@@ -2,4 +2,25 @@
 
 ## Description
 
+The primary dataset is of earthquakes of magnitude 7+ from the USGS Earthquakes Hazards Lists and Maps. With this data, we seek to answer each research question using the following aspects of the data.
+
+1.  **Do earthquakes exhibit a proximity to fault lines?**
+
+    Our interest lies in examining the distribution of earthquakes in relation to fault lines. Utilizing latitude and longitude data for the epicenters of major earthquakes, we aim to visualize this distribution by overlaying earthquake data onto a map displaying known fault lines. While one might anticipate that most major earthquakes would be concentrated near fault lines, a preliminary plot reveals instances of major earthquakes occurring outside these fault lines. We seek to explore the spatial distribution of such occurrences and assess variations over time. Defining how "close" an earthquake is to a fault line becomes a pivotal consideration, and we are poised to investigate the relationship between distance to fault lines and earthquake magnitude. The **Global Earthquake Model (GEM) Foundation** aggregates data from a set of regional and global fault datasets and gives a list of faultlines in the column (`geometry`) from which we can calculate the distance of earthquake longitude and latitude.
+
+```{=html}
+<!-- -->
+```
+2.  **What is the distribution of earthquakes on land versus in the ocean?**
+
+    Leveraging the latitude and longitude columns for epicenter location, we can use the `sf` package to categorize earthquakes as occurring on land or in the ocean. This additional column aids in examining the distribution of earthquakes over time and facilitates visualizing differences in magnitudes through a comparative boxplot for land and ocean locations.
+
+3.  **Are there discernible patterns in the time series of earthquakes, indicating seasonality or other temporal trends?**
+
+    Using the `time` column, which spans from 1905 to 2023 and includes UTC time up to the millisecond level of occurrence, we can plot major earthquakes against their respective time. Our goal is to identify any seasonality in the data, determine which year experienced the highest frequency of major earthquakes, and explore monthly patterns in earthquake occurrences.
+
+4.  **How close do earthquakes occur to population and city centers?**
+
+    Similar to our inquiry about proximity to fault lines, we aim to investigate the relationship between earthquake occurrence and population centers in the U.S. To achieve this, we will merge two datasets based on cities -- one containing population data as of 2023 and the other detailing earthquakes by city in the United States. We anticipate exploring trends at both the national and state levels, with the hope of uncovering any correlations or trends, such as a potential negative correlation between earthquake occurrence and population size.
+
 ## Missing value analysis
