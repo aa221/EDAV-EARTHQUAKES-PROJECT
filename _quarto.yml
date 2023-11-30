@@ -8,8 +8,8 @@ execute:
 book:
   title: "YOUR PROJECT TITLE"
   author:
-    - Adel Abdalla
-    - AUTHOR2 (UNI2)
+    - Adel Abdalla (ana2169)
+    - Emmanuel Murungi (emm2293)
   repo-url: https://github.com/aa221/EDAV-EARTHQUAKES-PROJECT
   date: today
   page-footer:
