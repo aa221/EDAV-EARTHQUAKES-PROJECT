@@ -6,7 +6,7 @@ execute:
   echo: true
 
 book:
-  title: "YOUR PROJECT TITLE"
+  title: "Earthquake Distribution"
   author:
     - Adel Abdalla (ana2169)
     - Emmanuel Murungi (emm2293)
