@@ -8,11 +8,11 @@ Our aim is threefold: firstly, to inform individuals about potential areas to av
 
 To articulate our research questions more specifically, our project will focus on three main areas:
 
+
 **Geographical Elements:**
 
-\- Do earthquakes exhibit a proximity to fault lines?
-
 \- What is the distribution of earthquakes on land versus in the ocean?
+
 
 **Time Elements:**
 
@@ -20,6 +20,8 @@ To articulate our research questions more specifically, our project will focus o
 
 **Demographic Elements:**
 
-\- How close do earthquakes occur to population and city centers?
+\- How close do earthquakes occur to population and US city centers?
+(Note we are using US city centers as states due to the lack of datasets in other countries).
 
-Moreover, our research will draw on data from various sources, including demographic information at the zip code level and indicators of ocean presence. As we embark on this endeavor, we recognize the importance of understanding not only the devastation caused by earthquakes but also the potential for proactive measures that can mitigate their impact on society. In the ever-evolving landscape of earthquake research, our project seeks to contribute valuable insights that go beyond immediate crisis response, aiming to inform long-term strategies for risk reduction and resilience building on a global scale.
+
+Moreover, our research will draw on data from various sources, including demographic information at the state level and indicators of ocean presence. As we embark on this endeavor, we recognize the importance of understanding not only the devastation caused by earthquakes but also the potential for proactive measures that can mitigate their impact on society. In the ever-evolving landscape of earthquake research, our project seeks to contribute valuable insights that go beyond immediate crisis response, aiming to inform long-term strategies for risk reduction and resilience building on a global scale.
