@@ -2,7 +2,7 @@
 
 ```{r}
 library(ggplot2)
-
+library(forcats)
 library(janitor)
 library('openxlsx')
 library(tidyr)
@@ -23,7 +23,7 @@ state_pop <- read.xlsx("data/state_pop.xlsx")
 # The third row has the column names
 
 state_pop <- state_pop %>%
-  row_to_names(row_number = 2) %>%
+  row_to_names(row_number = 3) %>%
   clean_names()
 
 colnames(state_pop)[1] = 'State'
@@ -41,6 +41,7 @@ state_pop_long <- state_pop %>%
 state_pop_long
 
 ```
+
 ```{r}
 # Assuming you have loaded the tidyr package
 # install.packages("tidyr")
@@ -73,13 +74,6 @@ state_earthquakes_selected <- state_earthquakes %>%
   select(NAME,MAGNITUDE)
 ```
 
-```{r}
-state_earthquakes_selected_cleaned
-```
-
-
-
-
 
 
 
@@ -92,19 +86,18 @@ state_earthquakes_selected_cleaned
 # Drop rows with NA values
 state_earthquakes_selected_cleaned <- na.omit(state_earthquakes_selected)
 
-# Select one row per state
-one_per_state <- state_earthquakes_selected_cleaned %>%
-  distinct(NAME, .keep_all = TRUE)
+# Select one row per state, grouping by and getting the average
+one_per_state  <- state_earthquakes_selected_cleaned %>% mutate(col_a = 1) %>% select(state = NAME, magnitude=MAGNITUDE) %>% group_by(state) %>% summarise(magnitude=mean(magnitude))
 
 
 
-ggplot(one_per_state, aes(x = MAGNITUDE)) +
-  geom_bar(stat = "identity", aes(y=fct_reorder(NAME, MAGNITUDE)),fill = "skyblue") +
+ggplot(one_per_state, aes(x = magnitude)) +
+  geom_bar(stat = "identity", aes(y=fct_reorder(state, magnitude)),fill = "skyblue") +
   labs(title = "Average Magnitude Per State", x =  "Average Magnitude", y = "State") +
   theme_minimal()
 
 ```
-As we can see, the average magnitude of earth quakes is highest in Nevada. This is interesting because it seems as though the highest magnitutde earthquakes. Nevada, Missouri, Washington are all on the west coast, which brings up the argument that states on the west coast are more impacted by Earthquakes, in terms of how strong they are. There could be an argument that these states have a higher population than others so we wil verify that soon.
+As we can see, the average magnitude of earth quakes is highest in Idaho This is interesting because it seems as though the highest magnitutde earthquakes occur on the west coast. Nevada, Utah, Washington are  also all on the west coast, which brings up the argument that states on the west coast are more impacted by Earthquakes, in terms of how strong they are. There could be an argument that these states have a higher population than others so we will verify that soon.
 
 
 
@@ -123,36 +116,42 @@ library(dplyr)
 
 
 # Perform left join for population and state. 
-joined_df <- left_join(newest_year_pop, state_earthquakes_selected_cleaned, by = c("State" = "NAME"))
-joined_df
+population_state <- left_join(newest_year_pop, state_earthquakes_selected_cleaned, by = c("State" = "NAME"))
+population_state
 ```
 
+
+
+
 ```{r}
-joined_df = joined_df %>% count('State')
-# Display the column names
+## Cleaning the table
+
+counts_and_average_mag <- population_state %>%
+  group_by(State) %>%
+  summarise(Count = n(), Average_Magnitude = mean(MAGNITUDE, na.rm = TRUE))
 
 
-joined_df <- joined_df[-1, ]
+
+counts_and_average_mag <- counts_and_average_mag[-1, ]
 
 ## remove rows with numbers
-rows_with_numbers <- grep("\\d", joined_df$State)
+rows_with_numbers <- grep("\\d", counts_and_average_mag$State)
 
 # Remove rows with numbers
-joined_df <- joined_df[-rows_with_numbers, ]
+counts_and_average_mag <- counts_and_average_mag[-rows_with_numbers, ]
 
 # Identify rows with ":" in the "State" column
-rows_with_colon <- grepl(":", joined_df$State)
+rows_with_colon <- grepl(":", counts_and_average_mag$State)
 
 # Remove rows with ":"
-joined_df <- joined_df[!rows_with_colon, ]
+counts_and_average_mag <- counts_and_average_mag[!rows_with_colon, ]
+counts_and_average_mag
+
 
 ```
 
 
 
-```{r}
-rows_with_numbers
-```
 
 
 ```{r,fig.width=4, fig.height=5}
@@ -161,70 +160,74 @@ rows_with_numbers
 
 library(forcats)
 # Order the data by frequency in descending order
-joined_df <- joined_df[order(-joined_df$freq), ]
+
 
 # Set wider figure dimensions
 options(repr.plot.width = 10, repr.plot.height = 6)
 
 
 
-ggplot(joined_df, aes(x = freq)) +
-  geom_bar(stat = "identity", aes(y=fct_reorder(State, freq)),fill = "skyblue") +
+ggplot(counts_and_average_mag, aes(x = Count)) +
+  geom_bar(stat = "identity", aes(y=fct_reorder(State, Count)),fill = "skyblue") +
   labs(title = "Earthquake Count Per State", x = "Earthquake Count", y = "State") +
   theme_minimal()
 ```
-As we can see, California has the most number of Earthquake's, next is Washington, then Nevada. As a result the argument regarding western vs eastern regions is still very relevant to this variable. Despite this it is less relevant as New York and Illinois are up there. Thee are highly populated areas and thus we will see the correlation between population and earthquake count below.
+As we can see, California has the most number of Earthquake's, next is Washington, then Nevada. As a result the argument regarding western vs eastern regions is still very relevant to this variable. Despite this it is less relevant as New York and Illinois are up there. Thee are highly populated areas and thus we will see the correlation between population and earthquake count below and average mag.
+
 
 
 ```{r}
-pop_joined <- left_join(newest_year_pop, state_earthquakes_selected_cleaned, by = c("State" = "NAME"))
 
-pop_joined = pop_joined %>% count('State')
-# Display the column names
+counts_pop_ <- na.omit(counts_pop_)
 
 
+counts_pop_ <- population_state %>%
+  group_by(State) %>%
+  summarise(Count = n(), Average_Magnitude = mean(MAGNITUDE, na.rm = TRUE),the_population = mean(population, na.rm = TRUE))
 
-pop_joined <- pop_joined[-1, ]
+
+counts_pop_ <- counts_pop_[-1, ]
 
 ## remove rows with numbers
-rows_with_numbers <- grep("\\d", pop_joined$State)
+rows_with_numbers <- grep("\\d", counts_pop_$State)
 
 # Remove rows with numbers
-pop_joined <- pop_joined[-rows_with_numbers, ]
+counts_pop_ <- counts_pop_[-rows_with_numbers, ]
 
 # Identify rows with ":" in the "State" column
-rows_with_colon <- grepl(":", pop_joined$State)
+rows_with_colon <- grepl(":", counts_pop_$State)
 
 # Remove rows with ":"
-pop_joined <- pop_joined[!rows_with_colon, ]
-
-pop_joined = left_join(pop_joined, newest_year_pop, by = c("State" = "State"))
+counts_pop_ <- counts_pop_[!rows_with_colon, ]
 
 
-
-pop_joined$freq <- log(pop_joined$freq)
-pop_joined$population <- log(pop_joined$population) ## took log so we can see it 
-
-```
-
-
-
-
-
-```{r}
-## get magnitude 
-pop_joined <- left_join(pop_joined, one_per_state, by = c("State" = "NAME"))
-pop_joined
+counts_pop_$Count <- round(log(counts_pop_$Count))
+counts_pop_$the_population <- log(counts_pop_$the_population) ## took log so we can see it 
+counts_pop_
 ```
 
 
 
 
 ```{r}
-# Scatter plot for population and freq
-ggplot(pop_joined, aes(x = population, y = freq)) +
+
+
+
+
+counts_pop_ <- na.omit(counts_pop_)
+
+# Create bins for Average_Magnitude
+counts_pop_$bins <- cut(counts_pop_$Average_Magnitude, breaks = c(0, 4, 11), labels = c("0-4", "5-11"))
+
+# Scatter plot with facets
+ggplot(counts_pop_, aes(x = the_population, y = Count)) +
+  geom_smooth(method = "lm", se = FALSE, col = "blue") +  # Add a line of best fit
+
   geom_point() +
-  labs(title = "Scatter Plot of Population vs Frequency", x = "Population", y = "Frequency") 
+  facet_wrap(~ bins, scales = "free") +
+  labs(title = "Scatter Plot of Population vs Frequency of Earthquakes with Binned Average Magnitude", 
+       x = "Population (LOG)", y = "Frequency of Earthquake (LOG)")
 
 ```
 
+There is a Slight positive correlation between states with a higher population and the frequency of which they have earthquakes. This is true for both high and low magnitutde earthquakes. This result, furthermore, motivates the need for safety measures against earthquakes across populus areas. If they do not, then there can be severe consequences for areas that are dense, in the form of lives lost.  
