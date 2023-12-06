@@ -15,7 +15,14 @@ library(dplyr)
 ```{r}
 ## state and earthquakes table
 state_earthquakes <- read.csv("data/earthquakes_by_state.csv")
-state_pop <- read.xlsx("data/state_pop.xlsx")
+state_pop <- read.xlsx("data/pop_data.xlsx")
+```
+
+
+
+
+```{r}
+min(state_earthquakes$YEAR)
 ```
 
 
@@ -34,11 +41,7 @@ state_pop
 ```{r}
 
 # Remove rows 
-state_pop_long <- state_pop %>%
-  select(-c(census, estimates_base,x2010))
-
-
-state_pop_long
+state_pop %>% rename(pop=na_2)
 
 ```
 
@@ -50,7 +53,7 @@ state_pop_long
 population_per_state <- state_pop_long %>%
   pivot_longer(cols = starts_with("x"),
                names_to = "year",
-               values_to = "population") %>%
+               values_to = "pop") %>%
   arrange(State, year)
 
 # Display the updated data frame
@@ -77,7 +80,7 @@ state_earthquakes_selected <- state_earthquakes %>%
 
 
 
-```{r,fig.width=4, fig.height=5}
+```{r,fig.width=10, fig.height=5}
 # Group by state, calculate the average magnitude across all years
 
 
@@ -93,7 +96,7 @@ one_per_state  <- state_earthquakes_selected_cleaned %>% mutate(col_a = 1) %>% s
 
 ggplot(one_per_state, aes(x = magnitude)) +
   geom_bar(stat = "identity", aes(y=fct_reorder(state, magnitude)),fill = "skyblue") +
-  labs(title = "Average Magnitude Per State", x =  "Average Magnitude", y = "State") +
+  labs(title = "Average Magnitude Per State for 1638-1985", x =  "Average Magnitude", y = "State") +
   theme_minimal()
 
 ```
@@ -104,8 +107,12 @@ As we can see, the average magnitude of earth quakes is highest in Idaho This is
 ```{r}
 ## use the population from the most recent year
 newest_year_pop <- population_per_state %>% 
-  filter(year == 2019) %>%
+  filter(year == max(year)) %>%
   select(-year)  # Drop the 'year' column
+
+
+
+
 newest_year_pop
 
 
@@ -154,7 +161,7 @@ counts_and_average_mag
 
 
 
-```{r,fig.width=4, fig.height=5}
+```{r,fig.width=10, fig.height=8}
 
 # Create a horizontal bar chart
 
@@ -169,7 +176,7 @@ options(repr.plot.width = 10, repr.plot.height = 6)
 
 ggplot(counts_and_average_mag, aes(x = Count)) +
   geom_bar(stat = "identity", aes(y=fct_reorder(State, Count)),fill = "skyblue") +
-  labs(title = "Earthquake Count Per State", x = "Earthquake Count", y = "State") +
+  labs(title = "Earthquake Count Per State for  1638-1985", x = "Earthquake Count", y = "State") +
   theme_minimal()
 ```
 As we can see, California has the most number of Earthquake's, next is Washington, then Nevada. As a result the argument regarding western vs eastern regions is still very relevant to this variable. Despite this it is less relevant as New York and Illinois are up there. Thee are highly populated areas and thus we will see the correlation between population and earthquake count below and average mag.
@@ -183,7 +190,7 @@ counts_pop_ <- na.omit(counts_pop_)
 
 counts_pop_ <- population_state %>%
   group_by(State) %>%
-  summarise(Count = n(), Average_Magnitude = mean(MAGNITUDE, na.rm = TRUE),the_population = mean(population, na.rm = TRUE))
+  summarise(Count = n(), Average_Magnitude = mean(MAGNITUDE, na.rm = TRUE),the_population = mean(pop, na.rm = TRUE))
 
 
 counts_pop_ <- counts_pop_[-1, ]
@@ -209,7 +216,7 @@ counts_pop_
 
 
 
-```{r}
+```{r,fig.width=10, fig.height=5}
 
 
 
@@ -225,7 +232,7 @@ ggplot(counts_pop_, aes(x = the_population, y = Count)) +
 
   geom_point() +
   facet_wrap(~ bins, scales = "free") +
-  labs(title = "Scatter Plot of Population vs Frequency of Earthquakes with Binned Average Magnitude", 
+  labs(title = "Scatter Plot of Current Population vs Frequency of Earthquakes with Binned Average Magnitude for 1638-1985", 
        x = "Population (LOG)", y = "Frequency of Earthquake (LOG)")
 
 ```
