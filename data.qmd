@@ -50,6 +50,8 @@ The primary dataset is of earthquakes of magnitude 7+ from the USGS Earthquakes 
 #| label: load-packages
 #| warning: false
 
+#install.packages("remotes")
+#remotes::install_github("jtr13/redav")
 library(plyr)
 library(dplyr)
 library(tidyr)

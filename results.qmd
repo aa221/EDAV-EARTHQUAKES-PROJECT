@@ -22,12 +22,14 @@ state_pop <- read.xlsx("data/pop_data.xlsx")
 
 
 ```{r}
+
 min(state_earthquakes$YEAR)
 ```
 
 
 ```{r}
 # The third row has the column names
+
 
 state_pop <- state_pop %>%
   row_to_names(row_number = 3) %>%
@@ -39,21 +41,31 @@ state_pop
 ```
 
 ```{r}
-
-# Remove rows 
-state_pop %>% rename(pop=na_2)
+colnames(state_pop)[colnames(state_pop) == "na_2"] <- "pop"
 
 ```
+
+
+```{r}
+state_pop
+```
+
+
+
+
 
 ```{r}
 # Assuming you have loaded the tidyr package
 # install.packages("tidyr")
 
 # Pivot the table so we have one row per year and state
-population_per_state <- state_pop_long %>%
+
+state_pop$x2020 <- as.numeric(state_pop$x2020)
+
+population_per_state <- state_pop %>%
   pivot_longer(cols = starts_with("x"),
                names_to = "year",
-               values_to = "pop") %>%
+               values_to = "population") %>%
   arrange(State, year)
 
 # Display the updated data frame
@@ -179,18 +191,20 @@ ggplot(counts_and_average_mag, aes(x = Count)) +
   labs(title = "Earthquake Count Per State for  1638-1985", x = "Earthquake Count", y = "State") +
   theme_minimal()
 ```
-As we can see, California has the most number of Earthquake's, next is Washington, then Nevada. As a result the argument regarding western vs eastern regions is still very relevant to this variable. Despite this it is less relevant as New York and Illinois are up there. Thee are highly populated areas and thus we will see the correlation between population and earthquake count below and average mag.
+As we can see, California has the most number of Earthquake's, next is Washington, then Nevada. As a result the argument regarding western vs eastern regions is still very relevant to this variable. Despite this it is less relevant as New York and Illinois are up there. These are highly populated areas and thus we will see the correlation between population and earthquake count below and average mag.
+
+
+
 
 
 
 ```{r}
 
-counts_pop_ <- na.omit(counts_pop_)
 
 
 counts_pop_ <- population_state %>%
   group_by(State) %>%
-  summarise(Count = n(), Average_Magnitude = mean(MAGNITUDE, na.rm = TRUE),the_population = mean(pop, na.rm = TRUE))
+  summarise(Count = n(), Average_Magnitude = mean(MAGNITUDE, na.rm = TRUE),the_population = mean(population, na.rm = TRUE))
 
 
 counts_pop_ <- counts_pop_[-1, ]
