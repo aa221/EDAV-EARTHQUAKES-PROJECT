@@ -7,23 +7,29 @@ library(janitor)
 library('openxlsx')
 library(tidyr)
 library(stringr)
+library(httr)
+library(jsonlite)
+library(plyr)
 library(dplyr)
 ```
 
-
+```{r}
+pages <- seq(1,2)
+us_eq_data = adply(pages, 1,
+            function(page_no){
+              res <- GET(paste0("https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/earthquakes?country=USA&page=",
+                                page_no))
+              data1 <- fromJSON(rawToChar(res$content))
+              return(data1$items)
+            }
+            )
+            
+```
 
 ```{r}
 ## state and earthquakes table
 state_earthquakes <- read.csv("data/earthquakes_by_state.csv")
 state_pop <- read.xlsx("data/pop_data.xlsx")
-```
-
-
-
-
-```{r}
-
-min(state_earthquakes$YEAR)
 ```
 
 
@@ -37,30 +43,31 @@ state_pop <- state_pop %>%
 
 colnames(state_pop)[1] = 'State'
 
+state_pop <- state_pop %>% 
+  slice(6:(nrow(state_pop)-5) ) %>% 
+  mutate(State = substring(State, 2)) %>% 
+  select(-2) %>% 
+  mutate(across(.cols = 2:ncol(.), .fns = as.numeric)) %>% 
+  tibble() 
+
+
+```
+
+
+```{r}
 state_pop
 ```
 
-```{r}
-colnames(state_pop)[colnames(state_pop) == "na_2"] <- "pop"
 
+
+
+
+```{r}
+(fivenum(state_earthquakes$YEAR))
 ```
 
-
 ```{r}
-state_pop
-```
-
-
-
-
-
-```{r}
-# Assuming you have loaded the tidyr package
-# install.packages("tidyr")
-
 # Pivot the table so we have one row per year and state
-
-state_pop$x2020 <- as.numeric(state_pop$x2020)
 
 population_per_state <- state_pop %>%
   pivot_longer(cols = starts_with("x"),
@@ -76,10 +83,7 @@ population_per_state
 
 # Remove the 'x' and '.'
 population_per_state <- population_per_state %>%
-  mutate(year = str_remove(year, "x"))
-
-population_per_state <- population_per_state %>%
-  mutate(State = str_remove(State, "."))
+  mutate(year = as.numeric(str_remove(year, "x")))
 
 population_per_state
 ```
@@ -113,6 +117,33 @@ ggplot(one_per_state, aes(x = magnitude)) +
 
 ```
 As we can see, the average magnitude of earth quakes is highest in Idaho This is interesting because it seems as though the highest magnitutde earthquakes occur on the west coast. Nevada, Utah, Washington are  also all on the west coast, which brings up the argument that states on the west coast are more impacted by Earthquakes, in terms of how strong they are. There could be an argument that these states have a higher population than others so we will verify that soon.
+
+```{r}
+p1 <- state_earthquakes %>% mutate(DECADE_START = YEAR - YEAR %% 10) %>% 
+  drop_na(MAGNITUDE) %>% 
+  group_by(DECADE_START, YEAR, MONTH, DAY, STATE) %>% 
+  summarise(MAGNITUDE=mean(MAGNITUDE)) %>% 
+  ungroup() %>% 
+  mutate(YEAR = as.factor(YEAR), DECADE_START = as.factor(DECADE_START)) %>% 
+  ggplot() + 
+  geom_boxplot(aes(y=MAGNITUDE, x=DECADE_START), varwidth = TRUE, outlier.size = 0.1, fill="red", alpha=0.5) + 
+  theme_linedraw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+p2 <- state_earthquakes %>% mutate(DECADE_START = YEAR - YEAR %% 10) %>%
+    drop_na(MAGNITUDE) %>% 
+    group_by(YEAR, MONTH, DAY, NAME) %>% 
+    summarise(MAGNITUDE=mean(MAGNITUDE)) %>% 
+    ungroup() %>% 
+    mutate(YEAR = as.factor(YEAR)) %>% 
+    ggplot() + 
+    geom_boxplot(aes(y=MAGNITUDE, x=reorder(NAME, -MAGNITUDE, mean)), varwidth = TRUE, outlier.size = 0.1, fill="red", alpha=0.5) + 
+    theme_linedraw() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+par(mfrow=c(1,2))
+p1
+p2
+```
 
 
 
@@ -151,7 +182,7 @@ counts_and_average_mag <- population_state %>%
 
 
 
-counts_and_average_mag <- counts_and_average_mag[-1, ]
+# counts_and_average_mag <- counts_and_average_mag[-1, ]
 
 ## remove rows with numbers
 rows_with_numbers <- grep("\\d", counts_and_average_mag$State)

@@ -96,7 +96,9 @@ library(tmap)
     earthquake_sf <- st_set_crs(earthquake_sf, 4326)
     us_states <- st_read("data/state_boundaries/cb_2018_us_state_20m.shp", quiet=TRUE)
     us_states <- st_transform(us_states, 4326)
-    earthquakes_by_state <- st_join(st_set_crs(earthquake_sf, 4326), us_states, join = st_within)
+    earthquakes_by_state <- st_join(st_set_crs(earthquake_sf, 4326), 
+                                    us_states, 
+                                    join = st_within)
 ```
 
 ```{r}
@@ -152,3 +154,4 @@ We've decided to drop these records as they only comprise 15% of our data, and a
     population_data <- population_data %>% pivot_longer(cols=!`Geographic Area`, names_to = "Year", values_to = "population")
     plot_missing(population_data, percent=FALSE)
 ```
+
