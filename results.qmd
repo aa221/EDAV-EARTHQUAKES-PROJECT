@@ -268,19 +268,19 @@ counts_pop_
 
 
 
-counts_pop_ <- na.omit(counts_pop_)
-
-# Create bins for Average_Magnitude
-counts_pop_$bins <- cut(counts_pop_$Average_Magnitude, breaks = c(0, 4, 11), labels = c("0-4", "5-11"))
-
-# Scatter plot with facets
-ggplot(counts_pop_, aes(x = the_population, y = Count)) +
-  geom_smooth(method = "lm", se = FALSE, col = "blue") +  # Add a line of best fit
-
-  geom_point() +
-  facet_wrap(~ bins, scales = "free") +
-  labs(title = "Scatter Plot of Current Population vs Frequency of Earthquakes with Binned Average Magnitude for 1638-1985", 
-       x = "Population (LOG)", y = "Frequency of Earthquake (LOG)")
+# counts_pop_ <- na.omit(counts_pop_)
+# 
+# # Create bins for Average_Magnitude
+# counts_pop_$bins <- cut(counts_pop_$Average_Magnitude, breaks = c(0, 4, 11), labels = c("0-4", "5-11"))
+# 
+# # Scatter plot with facets
+# ggplot(counts_pop_, aes(x = the_population, y = Count)) +
+#   geom_smooth(method = "lm", se = FALSE, col = "blue") +  # Add a line of best fit
+# 
+#   geom_point() +
+#   facet_wrap(~ bins, scales = "free") +
+#   labs(title = "Scatter Plot of Current Population vs Frequency of Earthquakes with Binned Average Magnitude for 1638-1985", 
+#        x = "Population (LOG)", y = "Frequency of Earthquake (LOG)")
 
 ```
 
