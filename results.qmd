@@ -145,7 +145,7 @@ As we can see, the average magnitude of earth quakes is highest in Idaho This is
 
 
 
-```{r,fig.width=10, fig.height=5}
+```{r,fig.width=15, fig.height=5}
 p1 <- state_earthquakes %>% mutate(DECADE_START = YEAR - YEAR %% 10) %>% 
   drop_na(MAGNITUDE) %>% 
   group_by(DECADE_START, YEAR, MONTH, DAY, STATE) %>% 
@@ -170,7 +170,7 @@ p2 <- state_earthquakes %>% mutate(DECADE_START = YEAR - YEAR %% 10) %>%
 
 ggpubr::ggarrange(plotlist = list(p1,p2), widths = c(1,1.5))
 ```
-
+The plot on the left Shows the distribution of earthquakes throughout the years. As we can see, the earthquakes initially all shared the same distribution with respect to magnitude, and eventually grew enormously in range and variance. This makes sense as the decades progressed the technology of detection did too and therefore the measurements became more accurate. Turning to the efigure on the right, we're able to see that California is the most variable state in terms of Magntitude of earthquakes. This makes sense because it is the largest state in America and thus naturally have the most variable earthquakes. The plot on the right also displays how the N.A (unkown state) has a large distribution of earthquakes. This is the result of joins on unkown states between tables.
 
 
 ```{r}
