@@ -361,6 +361,56 @@ legend(120, -65,
 ```
 As we can see by inspection, most earthquakes occur near the fault lines. This makes sense and is pretty expected behavioiur. This plot also highlights Where most earthquakes occur globally. It's pretty clear that most occur on the coasts (where fault lines are most common) and thereby most occur on islands (near singapore and the philippines).
 
+```{r}
+max(us_eq_data$year)
+```
+
+
+
+```{r}
+library(ggplot2)
+
+# Assuming your data frame is named 'earthquake_data'
+# Create a line plot of earthquake counts grouped by month
+ggplot(us_eq_data, aes(x = month)) +
+  geom_line(stat = "count", color = "blue") +
+  labs(title = "Earthquake Counts by Month from 1500 to 2023",
+       x = "Month",
+       y = "Count") +
+  scale_x_continuous(breaks = 1:12, labels = month.abb) +
+  theme_minimal()
+
+```
+Earthquakes occur most in November! This is really interesting. We'll now check it over the years. 
+
+```{r}
+library(ggplot2)
+
+library(dplyr)
+
+# Assuming your data frame is named 'us_eq_data'
+
+# Filter the data to include only years after 1700
+filtered_data <- us_eq_data %>%
+  filter(year > 1700)
+
+# Create a histogram of earthquake counts over the years
+histogram_plot <- ggplot(filtered_data, aes(x = year)) +
+  geom_histogram(binwidth = 1, fill = "red", color = "black") +
+  labs(title = "Earthquake Frequencies from 1700 to 2023",
+       x = "Year",
+       y = "Frequency") +
+  theme_minimal()
+
+# Display the histogram
+print(histogram_plot)
+
+
+
+```
+This plot displays the distribution of earthquakes from 1700 to 2023. As you can see, overtime, the frequencies increased which makes sense as measurement and systemic capturing of earthquakes improved.
+
+
 
 
 ```{r}
