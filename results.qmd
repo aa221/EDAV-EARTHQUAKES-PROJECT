@@ -1,5 +1,10 @@
 # Results
 
+
+
+
+
+
 ```{r}
 library(ggplot2)
 library(forcats)
@@ -13,6 +18,8 @@ library(forcats)
 library(sf)
 library(spData)
 library(purrr)
+library(purrr)
+library(ggpubr)
 library(plyr)
 library(dplyr)
 ```
@@ -136,7 +143,9 @@ ggplot(one_per_state, aes(x = magnitude)) +
 ```
 As we can see, the average magnitude of earth quakes is highest in Idaho This is interesting because it seems as though the highest magnitutde earthquakes occur on the west coast. Nevada, Utah, Washington are  also all on the west coast, which brings up the argument that states on the west coast are more impacted by Earthquakes, in terms of how strong they are. There could be an argument that these states have a higher population than others so we will verify that soon.
 
-```{r}
+
+
+```{r,fig.width=10, fig.height=5}
 p1 <- state_earthquakes %>% mutate(DECADE_START = YEAR - YEAR %% 10) %>% 
   drop_na(MAGNITUDE) %>% 
   group_by(DECADE_START, YEAR, MONTH, DAY, STATE) %>% 
@@ -224,43 +233,53 @@ counts_and_average_mag
 
 
 
-```{r,fig.width=10, fig.height=8}
+```{r,fig.width=50, fig.height=50}
 
-# Create a horizontal bar chart
+# Install and load the plotly library if not already installed
+# install.packages("plotly")
+# Install and load the plotly library if not already installed
+# install.packages("plotly")
+library(plotly)
 
-
-# Order the data by frequency in descending order
-# 
-# Panel = cut(Assets, 4, breaks = fivenum(Assets),
-#          labels = c("$66k - $604k", "$1 - 3.5 Million",
-#                     "$4 - 12 Million", "$18 Million+"))) |> mutate(Panel = fct_rev(Panel)
-
-# Set wider figure dimensions
-options(repr.plot.width = 10, repr.plot.height = 6)
-
-state_earthquakes %>% 
+state_plot <- state_earthquakes %>% 
   mutate(DECADE_START = YEAR - YEAR %% 50) %>% 
   mutate(DECADE_START = as.factor(DECADE_START)) %>% 
-  select(DECADE_START, YEAR,MONTH, NAME) %>% 
-  left_join(newest_year_pop, by = c("NAME"="State" )) %>% 
+  select(DECADE_START, YEAR, MONTH, NAME) %>% 
+  left_join(newest_year_pop, by = c("NAME" = "State" )) %>% 
   group_by(DECADE_START, NAME) %>%
   summarise(Count = n()) %>% 
   drop_na(NAME) %>% 
-  mutate(NAME = fct_rev(fct_reorder(NAME,Count, .fun=sum,.desc = TRUE)) ) %>% 
+  mutate(NAME = fct_rev(fct_reorder(NAME, Count, .fun = sum, .desc = TRUE))) %>% 
   ungroup() %>% 
-  mutate(cg = cut(Count, 4, breaks = fivenum(Count),labels=c(1,2,3,4) ) ) %>% 
-  mutate(cg = if_else(NAME=="California", "CA", cg)) %>% 
+  mutate(cg = cut(Count, 4, breaks = fivenum(Count), labels = c(1, 2, 3, 4))) %>% 
+  mutate(cg = if_else(NAME == "California", "CA", cg)) %>% 
   arrange(desc(NAME)) %>% 
   ggplot() +
-  geom_point(aes(x = Count, y=fct_reorder(NAME, Count), col=DECADE_START)) +
+  geom_point(aes(x = Count, y = fct_reorder(NAME, Count), col = DECADE_START)) +
   labs(title = "Earthquake Count Per State for  1638-1985", x = "Earthquake Count", y = "State") +
-  theme_linedraw() + facet_wrap(~cg)
+  theme_linedraw() + 
+  facet_wrap(~ cg)
+
+# Convert ggplot to plotly and adjust width
+state_plotly <- ggplotly(state_plot, width = 1000, height = 1000)  # Adjust the width as needed
+
+# Display the interactive plot
+state_plotly
+
+
+
 ```
-As we can see, California has the most number of Earthquake's, next is Washington, then Nevada. As a result the argument regarding western vs eastern regions is still very relevant to this variable. Despite this it is less relevant as New York and Illinois are up there. These are highly populated areas and thus we will see the correlation between population and earthquake count below and average mag.
+As we can see California has the highest number of earthquakes across all Decades. Another interesting point was that all counts across almost all states in the decades before the 1950s were extremely low. This could be due to the fact that at the time states could not track earthquakes well and therefore did not detect many of them.
 
+```{r}
+counts_pop_ <- population_state %>%
+  group_by(State) %>%
+  summarise(Count = n(),Average_Magnitude = mean(MAGNITUDE, na.rm = FALSE),the_population = mean(population, na.rm = FALSE))
+counts_pop_ <- counts_pop_[-1, ]
 
-
-
+## remove rows with numbers
+counts_pop_
+```
 
 
 ```{r}
@@ -269,16 +288,14 @@ As we can see, California has the most number of Earthquake's, next is Washingto
 
 counts_pop_ <- population_state %>%
   group_by(State) %>%
-  summarise(Count = n(), Average_Magnitude = mean(MAGNITUDE, na.rm = TRUE),the_population = mean(population, na.rm = TRUE))
+  summarise(Count = n(), Average_Magnitude = mean(MAGNITUDE, na.rm = FALSE),the_population = mean(population, na.rm = FALSE))
 
 
 counts_pop_ <- counts_pop_[-1, ]
 
 ## remove rows with numbers
-rows_with_numbers <- grep("\\d", counts_pop_$State)
 
-# Remove rows with numbers
-counts_pop_ <- counts_pop_[-rows_with_numbers, ]
+
 
 # Identify rows with ":" in the "State" column
 rows_with_colon <- grepl(":", counts_pop_$State)
@@ -300,25 +317,25 @@ counts_pop_
 
 
 
-# counts_pop_ <- na.omit(counts_pop_)
-# 
-# # Create bins for Average_Magnitude
-# counts_pop_$bins <- cut(counts_pop_$Average_Magnitude, breaks = c(0, 4, 11), labels = c("0-4", "5-11"))
-# 
-# # Scatter plot with facets
-# ggplot(counts_pop_, aes(x = the_population, y = Count)) +
-#   geom_smooth(method = "lm", se = FALSE, col = "blue") +  # Add a line of best fit
-# 
-#   geom_point() +
-#   facet_wrap(~ bins, scales = "free") +
-#   labs(title = "Scatter Plot of Current Population vs Frequency of Earthquakes with Binned Average Magnitude for 1638-1985", 
-#        x = "Population (LOG)", y = "Frequency of Earthquake (LOG)")
+counts_pop_ <- na.omit(counts_pop_)
+
+# Create bins for Average_Magnitude
+counts_pop_$bins <- cut(counts_pop_$Average_Magnitude, breaks = c(0, 4, 11), labels = c("0-4", "5-11"))
+
+# Scatter plot with facets
+ggplot(counts_pop_, aes(x = the_population, y = Count)) +
+  geom_smooth(method = "lm", se = FALSE, col = "blue") +  # Add a line of best fit
+
+  geom_point() +
+  facet_wrap(~ bins, scales = "free") +
+  labs(title = "Scatter Plot of Current Population vs Frequency of Earthquakes with Binned Average Magnitude for 1638-1985",
+       x = "Population (LOG)", y = "Frequency of Earthquake (LOG)")
 
 ```
 
 There is a Slight positive correlation between states with a higher population and the frequency of which they have earthquakes. This is true for both high and low magnitutde earthquakes. This result, furthermore, motivates the need for safety measures against earthquakes across populus areas. If they do not, then there can be severe consequences for areas that are dense, in the form of lives lost.  
 
-```{r}
+```{r,fig.width=10, fig.height=5}
 usgs_eq_list <- read.csv('data/query.csv') %>% 
   tibble() %>% 
   separate(time, into = 'date', sep="T", extra = 'drop', remove = FALSE) %>% 
@@ -337,14 +354,14 @@ ii <- !is.na(as.numeric(st_intersects(earthquakes_locations, world)))
 plot(st_geometry(world), main="Global Earthquakes from 1900 to 2023 (Magnitude 7+)")
 plot(earthquakes_locations, col=sapply(ii, function(x){if(x){"black"}else{"blue"}}), pch=16, add=TRUE, cex=0.5)
 plot(st_geometry(usgs_fault_lines), col= rgb(red = 1, green = 0, blue = 0, alpha = 0.1), add=TRUE)
-legend(180, 1.5,
+legend(120, -65,
      legend=c("Land","Water"),
      col=c("black","blue"),
-     cex=0.5, pch=16, horiz=FALSE)
+     cex=2.5, pch=16, horiz=FALSE)
 ```
-```{r}
+As we can see by inspection, most earthquakes occur near the fault lines. This makes sense and is pretty expected behavioiur. This plot also highlights Where most earthquakes occur globally. It's pretty clear that most occur on the coasts (where fault lines are most common) and thereby most occur on islands (near singapore and the philippines).
 
-```
+
 
 ```{r}
 pts_split <- split(earthquakes_locations, (as.numeric(rownames(pts))-1) %/% 50) 
