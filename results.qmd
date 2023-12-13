@@ -415,6 +415,8 @@ mosaicplot(table(mosaic_data$Ocean, mosaic_data$horizontal_encode),
            main = "Mosaic Plot: Ocean vs. Horizontal Error Category", color = c("blue", "green"))
 
 ```
+There are much more points not in the ocean than there are within the Ocean. For those within the ocean, they have a slightly larger proportion of points that have a horizontal error more than 0. THis makes sense because it could be harder to measure these earthquakes since they occur on the ocean. This needs to be kept in mind when dealaing with this analysis—earthquakes within the ocean may not be as accurate in their measurements.  
+
 
 ```{r}
 mosaic_data
