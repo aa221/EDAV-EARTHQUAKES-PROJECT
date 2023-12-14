@@ -22,25 +22,26 @@ library(purrr)
 library(ggpubr)
 library(plyr)
 library(dplyr)
+library(vcd)
 ```
 
 ```{r}
 
 ## hey we're working here 
-pages <- seq(1,2)
-us_eq_data = adply(pages, 1,
-            function(page_no){
-              res <- GET(paste0("https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/earthquakes?country=USA&page=",
-                                page_no))
-              data1 <- fromJSON(rawToChar(res$content))
-              return(data1$items)
-            }
-            )
+# pages <- seq(1,2)
+# us_eq_data = adply(pages, 1,
+#             function(page_no){
+#               res <- GET(paste0("https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/earthquakes?country=USA&page=",
+#                                 page_no))
+#               data1 <- fromJSON(rawToChar(res$content))
+#               return(data1$items)
+#             }
+#             )
             
 ```
 
 ```{r}
-date_sequence <- seq(as.Date("1900-01-01"), as.Date("1995-12-01"), length.out=50)
+date_sequence <- seq(as.Date("1900-01-01"), as.Date("1995-12-01"), length.out=100)
 global_eq_data <- map2_dfr(date_sequence[1:length(date_sequence)-1], 
                            date_sequence[-1], 
                            .f=function(x,y){
@@ -143,8 +144,10 @@ ggplot(one_per_state, aes(x = magnitude)) +
 ```
 As we can see, the average magnitude of earth quakes is highest in Idaho This is interesting because it seems as though the highest magnitutde earthquakes occur on the west coast. Nevada, Utah, Washington are  also all on the west coast, which brings up the argument that states on the west coast are more impacted by Earthquakes, in terms of how strong they are. There could be an argument that these states have a higher population than others so we will verify that soon.
 
-```{r}
-state_earthquakes %>% mutate(DECADE_START = YEAR - YEAR %% 10) %>% 
+
+
+```{r,fig.width=15, fig.height=5}
+p1 <- state_earthquakes %>% mutate(DECADE_START = YEAR - YEAR %% 10) %>% 
   drop_na(MAGNITUDE) %>% 
   group_by(DECADE_START, YEAR, MONTH, DAY, STATE) %>% 
   summarise(MAGNITUDE=mean(MAGNITUDE)) %>% 
@@ -154,13 +157,8 @@ state_earthquakes %>% mutate(DECADE_START = YEAR - YEAR %% 10) %>%
   geom_boxplot(aes(y=MAGNITUDE, x=DECADE_START), varwidth = TRUE, outlier.size = 0.1, fill="red", alpha=0.5) + 
   theme_linedraw() + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-```
 
-
-```{r,fig.width=15, fig.height=5}
-
-
-state_earthquakes %>% mutate(DECADE_START = YEAR - YEAR %% 10) %>%
+p2 <- state_earthquakes %>% mutate(DECADE_START = YEAR - YEAR %% 10) %>%
     drop_na(MAGNITUDE) %>% 
     group_by(YEAR, MONTH, DAY, NAME) %>% 
     summarise(MAGNITUDE=mean(MAGNITUDE)) %>% 
@@ -171,8 +169,9 @@ state_earthquakes %>% mutate(DECADE_START = YEAR - YEAR %% 10) %>%
                  varwidth = TRUE, outlier.size = 0.1, fill="red", alpha=0.5) + 
     theme_linedraw() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
+ggpubr::ggarrange(plotlist = list(p1,p2), widths = c(1,1.5))
 ```
-The plot above Shows the distribution of earthquakes throughout the years. As we can see, the earthquakes initially all shared the same distribution with respect to magnitude, and eventually grew enormously in range and variance. This makes sense as the decades progressed the technology of detection did too and therefore the measurements became more accurate. Turning to the efigure on the right, we're able to see that California is the most variable state in terms of Magntitude of earthquakes. This makes sense because it is the largest state in America and thus naturally have the most variable earthquakes. The plot on the right also displays how the N.A (unkown state) has a large distribution of earthquakes. This is the result of joins on unkown states between tables.
+The plot on the left Shows the distribution of earthquakes throughout the years. As we can see, the earthquakes initially all shared the same distribution with respect to magnitude, and eventually grew enormously in range and variance. This makes sense as the decades progressed the technology of detection did too and therefore the measurements became more accurate. Turning to the efigure on the right, we're able to see that California is the most variable state in terms of Magntitude of earthquakes. This makes sense because it is the largest state in America and thus naturally have the most variable earthquakes. The plot on the right also displays how the N.A (unkown state) has a large distribution of earthquakes. This is the result of joins on unkown states between tables.
 
 
 ```{r}
@@ -243,7 +242,7 @@ counts_and_average_mag
 # install.packages("plotly")
 library(plotly)
 
-state_plot <- state_earthquakes %>% 
+state_plot_data <- state_earthquakes %>% 
   mutate(DECADE_START = YEAR - YEAR %% 50) %>% 
   mutate(DECADE_START = as.factor(DECADE_START)) %>% 
   select(DECADE_START, YEAR, MONTH, NAME) %>% 
@@ -252,15 +251,34 @@ state_plot <- state_earthquakes %>%
   summarise(Count = n()) %>% 
   drop_na(NAME) %>% 
   mutate(NAME = fct_rev(fct_reorder(NAME, Count, .fun = sum, .desc = TRUE))) %>% 
+  ungroup()
+  
+name_ordering <- state_plot_data %>% 
+  group_by(NAME) %>%  
+  mutate(DECADE_START=as.numeric(as.character(DECADE_START))) %>%  
+  filter(DECADE_START == max(DECADE_START)) %>% 
   ungroup() %>% 
-  mutate(cg = cut(Count, 4, breaks = fivenum(Count), labels = c(1, 2, 3, 4))) %>% 
-  mutate(cg = if_else(NAME == "California", "CA", cg)) %>% 
-  arrange(desc(NAME)) %>% 
-  ggplot() +
-  geom_point(aes(x = Count, y = fct_reorder(NAME, Count), col = DECADE_START)) +
+  arrange(desc(Count)) %>% 
+  mutate(NAME=as.character(NAME)) %>% 
+  pull(NAME)
+state_plot_data_1 <- state_plot_data %>% 
+  left_join(state_plot_data %>% 
+              group_by(NAME) %>% 
+              summarise(Count = sum(Count)) %>% 
+              ungroup() %>% 
+              arrange(desc(Count)) %>% 
+              mutate(cgroup = cut(Count, 4, breaks = fivenum(Count), labels = c(1, 2, 3, 4))) %>% 
+              select(NAME, cgroup),
+            by=c("NAME"="NAME")) %>% 
+  mutate(cgroup = if_else(NAME == "California", "CA", cgroup)) %>% 
+  mutate(NAME = factor(NAME, levels = name_ordering)) %>% 
+  arrange(NAME)
+state_plot <-  state_plot_data_1 %>%  ggplot() +
+  geom_point(aes(x = Count, y = fct_rev(NAME), col = DECADE_START)) +
   labs(title = "Earthquake Count Per State for  1638-1985", x = "Earthquake Count", y = "State") +
   theme_linedraw() + 
-  facet_wrap(~ cg)
+  facet_wrap(~cgroup, ncol = 1, scales = "free") + 
+  scale_color_brewer(palette = "Blues")
 
 # Convert ggplot to plotly and adjust width
 state_plotly <- ggplotly(state_plot, width = 1000, height = 1000)  # Adjust the width as needed
@@ -277,6 +295,7 @@ As we can see California has the highest number of earthquakes across all Decade
 counts_pop_ <- population_state %>%
   group_by(State) %>%
   summarise(Count = n(),Average_Magnitude = mean(MAGNITUDE, na.rm = FALSE),the_population = mean(population, na.rm = FALSE))
+counts_pop_ <- counts_pop_[-1, ]
 
 ## remove rows with numbers
 counts_pop_
@@ -292,8 +311,17 @@ counts_pop_ <- population_state %>%
   summarise(Count = n(), Average_Magnitude = mean(MAGNITUDE, na.rm = FALSE),the_population = mean(population, na.rm = FALSE))
 
 
+counts_pop_ <- counts_pop_[-1, ]
+
+## remove rows with numbers
 
 
+
+# Identify rows with ":" in the "State" column
+rows_with_colon <- grepl(":", counts_pop_$State)
+
+# Remove rows with ":"
+counts_pop_ <- counts_pop_[!rows_with_colon, ]
 
 
 counts_pop_$Count <- round(log(counts_pop_$Count))
@@ -301,9 +329,6 @@ counts_pop_$the_population <- log(counts_pop_$the_population) ## took log so we 
 counts_pop_
 ```
 
-```{r}
-counts_pop_
-```
 
 
 
@@ -331,13 +356,34 @@ ggplot(counts_pop_, aes(x = the_population, y = Count)) +
 There is a Slight positive correlation between states with a higher population and the frequency of which they have earthquakes. This is true for both high and low magnitutde earthquakes. This result, furthermore, motivates the need for safety measures against earthquakes across populus areas. If they do not, then there can be severe consequences for areas that are dense, in the form of lives lost.  
 
 ```{r,fig.width=10, fig.height=5}
-usgs_eq_list <- read.csv('data/query.csv') %>% 
-  tibble() %>% 
-  separate(time, into = 'date', sep="T", extra = 'drop', remove = FALSE) %>% 
+addTrans <- function(color,trans){
+  # This function adds transparancy to a color.
+  # Define transparancy with an integer between 0 and 255
+  # 0 being fully transparant and 255 being fully visable
+  # Works with either color and trans a vector of equal length,
+  # or one of the two of length 1.
+
+  if (length(color)!=length(trans)&!any(c(length(color),length(trans))==1)) stop("Vector lengths not correct")
+  if (length(color)==1 & length(trans)>1) color <- rep(color,length(trans))
+  if (length(trans)==1 & length(color)>1) trans <- rep(trans,length(color))
+
+  num2hex <- function(x)
+  {
+    hex <- unlist(strsplit("0123456789ABCDEF",split=""))
+    return(paste(hex[(x-x%%16)/16+1],hex[x%%16+1],sep=""))
+  }
+  rgb <- rbind(col2rgb(color),trans)
+  res <- paste("#",apply(apply(rgb,2,num2hex),2,paste,collapse=""),sep="")
+  return(res)
+}
+
+usgs_eq_list <- read.csv('data/query.csv') %>%
+  tibble() %>%
+  separate(time, into = 'date', sep="T", extra = 'drop', remove = FALSE) %>%
   mutate(date=as.Date(date))
 
-earthquakes_locations <- usgs_eq_list %>% 
-  st_as_sf( coords=4:3, crs=4326)
+earthquakes_locations <- usgs_eq_list %>%
+  st_as_sf( coords=5:4, crs=4326)
 
 usgs_fault_lines <- st_read("data/global_fault_lines/gem_active_faults.shp", quiet=TRUE)
 usgs_fault_lines <- st_set_crs(usgs_fault_lines, 4326)
@@ -346,14 +392,20 @@ usgs_fault_lines <- st_set_crs(usgs_fault_lines, 4326)
 ii <- !is.na(as.numeric(st_intersects(earthquakes_locations, world)))
 
 ## Check that it worked
-plot(st_geometry(world), main="Global Earthquakes from 1900 to 2023 (Magnitude 7+)")
-plot(earthquakes_locations, col=sapply(ii, function(x){if(x){"black"}else{"blue"}}), pch=16, add=TRUE, cex=0.5)
-plot(st_geometry(usgs_fault_lines), col= rgb(red = 1, green = 0, blue = 0, alpha = 0.1), add=TRUE)
+plot(st_geometry(world), main="Global Earthquakes from 1900 to 1995 (Magnitude 4+)")
+earthquake_colors <- sapply(ii, function(x){if(x){"black"}else{"blue"}})
+# plot(earthquakes_locations, col=sapply(ii, function(x){if(x){"black"}else{"blue"}}), alpha=0.2, pch=16, add=TRUE, cex=0.5)
+eq_mag_cols <- earthquakes_locations %>% mutate(col_255 = 255*(mag - min(mag))/diff(range(mag)) ) %>% pull(col_255)
+plot(earthquakes_locations, col=addTrans(sapply(ii, function(x){if(x){"black"}else{"blue"}}), eq_mag_cols), pch=16, add=TRUE, cex=0.5)
+
+plot(st_geometry(usgs_fault_lines), col= rgb(red = 1, green = 0, blue = 0, alpha = 0.5), add=TRUE)
 legend(120, -65,
      legend=c("Land","Water"),
      col=c("black","blue"),
-     cex=2.5, pch=16, horiz=FALSE)
+     cex=0.5, pch=10, horiz=FALSE)
 ```
+
+
 As we can see by inspection, most earthquakes occur near the fault lines. This makes sense and is pretty expected behavioiur. This plot also highlights Where most earthquakes occur globally. It's pretty clear that most occur on the coasts (where fault lines are most common) and thereby most occur on islands (near singapore and the philippines).
 
 ```{r}
@@ -410,31 +462,57 @@ This plot displays the distribution of earthquakes from 1700 to 2023. As you can
 mosaic_data <- mutate(usgs_eq_list, Ocean = ii)
 mosaic_data$horizontal_encode <-  ifelse(is.na(mosaic_data$horizontalError), '0', 'More than 0')
 
+mosaic_data %>% 
+  mutate(Freq=1) %>% 
+  group_by(horizontal_encode, Ocean) %>% 
+  summarise(Freq=sum(Freq)) %>% 
+  vcd::mosaic(Ocean ~ horizontal_encode, 
+              ., 
+              direction=c("v", "h"), 
+              highlighting_fill = c( "green", "blue"))
 
-mosaicplot(table(mosaic_data$Ocean, mosaic_data$horizontal_encode),
-           main = "Mosaic Plot: Ocean vs. Horizontal Error Category", color = c("blue", "green"))
-
+# mosaicplot(table(mosaic_data$Ocean, mosaic_data$horizontal_encode),
+#            main = "Mosaic Plot: Ocean vs. Horizontal Error Category", color = c("blue", "green"))
 ```
-There are much more points not in the ocean than there are within the Ocean. For those within the ocean, they have a slightly larger proportion of points that have a horizontal error more than 0. THis makes sense because it could be harder to measure these earthquakes since they occur on the ocean. This needs to be kept in mind when dealaing with this analysis—earthquakes within the ocean may not be as accurate in their measurements.  
-
-
 ```{r}
-mosaic_data
-```
-
-
-
-
-```{r}
-pts_split <- split(earthquakes_locations, (as.numeric(rownames(pts))-1) %/% 50) 
-dists <- pts_split %>% 
-    lapply(function(x){
-      # distance in (m)
-        dist <- st_geometry(obj = usgs_fault_lines) %>%
-            st_distance(y=x) %>% 
-            apply(2, min)
-        return(x %>% cbind(tibble(dist)))
-    })
+# 
+# pts_split <- earthquakes_locations %>% split((as.numeric(rownames(.))-1) %/% 50) 
+# usgs_fault_mat <- usgs_fault_lines %>% tibble() %>% apply(MARGIN=1, FUN =function(x){
+#     coords_matrix <- st_coordinates(x$geometry)
+#     ymin <- coords_matrix[,"Y"] %>% min()
+#     ymax <- coords_matrix[,"Y"] %>% max()
+#     xmin <- coords_matrix[,"X"] %>% min()
+#     xmax <- coords_matrix[,"X"] %>% max()
+#     return(c(xmin,xmax, ymin, ymax))
+# }) %>% t()
+# 
+# colnames(usgs_fault_mat) <- c('xmin', 'xmax', 'ymin', 'ymax')
+# usgs_fault_lines_cbound <- usgs_fault_lines %>% cbind(usgs_fault_mat)
+# 
+# dists <- pts_split %>% 
+#     lapply(function(x){
+#       # distance in (m)
+#       print(paste0(x %>% pull(date) %>% max() ))
+#         dist <- apply(x, MARGIN=1, .function= function(y){
+#           point_mat <- st_coordinates(y$geometry)
+#           point_x <- point_mat[,"X"]
+#           point_y <- point_mat[,"Y"]
+#           
+#           relevant_fault_lines <- usgs_fault_lines_cbound %>% 
+#             filter(xmin < point_x) %>% 
+#             filter(xmax > point_x) %>% 
+#             filter(ymax > point_y)
+#           y_geometry <- st_geometry(obj = y$geometry)
+#           y_geometry <- st_set_crs(y_geometry, 4326)
+#           dist_1 <- st_geometry(obj = relevant_fault_lines) %>%
+#             st_distance(y=y_geometry) %>% 
+#             apply(2, min)
+#           return(dist_1)
+#             
+#           # st_intersection(select(places, name), usgs_fault_lines_cbound)
+#         } ) 
+#         return(x %>% cbind(tibble(dist)))
+#     })
 ```
 
 ```{r}
