@@ -7,6 +7,10 @@
 </style> 
 
 <div id="plot">
+<div>
+  <label for="decade-slider">Select Decade:</label>
+  <input type="range" id="decade-slider" min="1630" max="1980" step="10" value="1630">
+  <span id="selected-decade">1630</span>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
