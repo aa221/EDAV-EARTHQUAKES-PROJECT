@@ -166,14 +166,15 @@ ul.task-list li input[type="checkbox"] {
   }
 </style>
 <div id="plot">
-
+<div>
+<p><label for="decade-slider">Select Decade:</label> <input type="range" id="decade-slider" min="1630" max="1980" step="10" value="1630"> <span id="selected-decade">1630</span></p>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <script src="scripts/myscript.js"></script>
 
 
 
-</main> <!-- /main -->
+</div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
