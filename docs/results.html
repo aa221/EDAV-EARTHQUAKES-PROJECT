@@ -95,6 +95,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
+<script src="site_libs/htmlwidgets-1.6.2/htmlwidgets.js"></script>
+<script src="site_libs/plotly-binding-4.10.2/plotly.js"></script>
+<script src="site_libs/typedarray-0.1/typedarray.min.js"></script>
+<script src="site_libs/jquery-3.5.1/jquery.min.js"></script>
+<link href="site_libs/crosstalk-1.2.0/css/crosstalk.min.css" rel="stylesheet">
+<script src="site_libs/crosstalk-1.2.0/js/crosstalk.min.js"></script>
+<link href="site_libs/plotly-htmlwidgets-css-2.11.1/plotly-htmlwidgets.css" rel="stylesheet">
+<script src="site_libs/plotly-main-2.11.1/plotly-latest.min.js"></script>
 
 
 </head>
@@ -172,7 +180,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#exploration-of-earthquakes-by-us-state" id="toc-exploration-of-earthquakes-by-us-state" class="nav-link active" data-scroll-target="#exploration-of-earthquakes-by-us-state"><span class="header-section-number">3.1</span> Exploration of Earthquakes By US State</a></li>
+  <li><a href="#exploration-of-global-earthquakes" id="toc-exploration-of-global-earthquakes" class="nav-link" data-scroll-target="#exploration-of-global-earthquakes"><span class="header-section-number">3.2</span> Exploration of Global Earthquakes</a></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/aa221/EDAV-EARTHQUAKES-PROJECT/edit/main/results.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/aa221/EDAV-EARTHQUAKES-PROJECT/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -197,436 +212,107 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(forcats)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(janitor)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Pivot the table so we have one row per year and state</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>population_per_state <span class="ot">&lt;-</span> state_pop <span class="sc">%&gt;%</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">starts_with</span>(<span class="st">"x"</span>),</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">"year"</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>               <span class="at">values_to =</span> <span class="st">"population"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(State, year)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the updated data frame</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"># population_per_state</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-Attaching package: 'janitor'</code></pre>
 </div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:stats':
-
-    chisq.test, fisher.test</code></pre>
-</div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">'openxlsx'</span>)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(stringr)</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(httr)</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(jsonlite)</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(plyr)</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-Attaching package: 'dplyr'</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:plyr':
-
-    arrange, count, desc, failwith, id, mutate, rename, summarise,
-    summarize</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:stats':
-
-    filter, lag</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:base':
-
-    intersect, setdiff, setequal, union</code></pre>
-</div>
-</div>
+<section id="exploration-of-earthquakes-by-us-state" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="exploration-of-earthquakes-by-us-state"><span class="header-section-number">3.1</span> Exploration of Earthquakes By US State</h2>
+<p>The conclusions drawn from this section will be focused on U.S. State specific data, with the datasets from earthquakes between 1638-1985</p>
 <div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="do">## hey we're working here </span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>pages <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">2</span>)</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>us_eq_data <span class="ot">=</span> <span class="fu">adply</span>(pages, <span class="dv">1</span>,</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>            <span class="cf">function</span>(page_no){</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>              res <span class="ot">&lt;-</span> <span class="fu">GET</span>(<span class="fu">paste0</span>(<span class="st">"https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/earthquakes?country=USA&amp;page="</span>,</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>                                page_no))</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>              data1 <span class="ot">&lt;-</span> <span class="fu">fromJSON</span>(<span class="fu">rawToChar</span>(res<span class="sc">$</span>content))</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>              <span class="fu">return</span>(data1<span class="sc">$</span>items)</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>            }</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>            )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="do">## state and earthquakes table</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>state_earthquakes <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"data/earthquakes_by_state.csv"</span>)</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>state_pop <span class="ot">&lt;-</span> <span class="fu">read.xlsx</span>(<span class="st">"data/pop_data.xlsx"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The third row has the column names</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>state_pop <span class="ot">&lt;-</span> state_pop <span class="sc">%&gt;%</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">row_to_names</span>(<span class="at">row_number =</span> <span class="dv">3</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">clean_names</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: Row 3 does not provide unique names. Consider running clean_names()
-after row_to_names().</code></pre>
-</div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(state_pop)[<span class="dv">1</span>] <span class="ot">=</span> <span class="st">'State'</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>state_pop <span class="ot">&lt;-</span> state_pop <span class="sc">%&gt;%</span> </span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">6</span><span class="sc">:</span>(<span class="fu">nrow</span>(state_pop)<span class="sc">-</span><span class="dv">5</span>) ) <span class="sc">%&gt;%</span> </span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">State =</span> <span class="fu">substring</span>(State, <span class="dv">2</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="dv">2</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="at">.cols =</span> <span class="dv">2</span><span class="sc">:</span><span class="fu">ncol</span>(.), <span class="at">.fns =</span> as.numeric)) <span class="sc">%&gt;%</span> </span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>() </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>state_pop</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 52 × 4
-   State                   x2020    x2021    x2022
-   &lt;chr&gt;                   &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
- 1 Alabama               5031362  5049846  5074296
- 2 Alaska                 732923   734182   733583
- 3 Arizona               7179943  7264877  7359197
- 4 Arkansas              3014195  3028122  3045637
- 5 California           39501653 39142991 39029342
- 6 Colorado              5784865  5811297  5839926
- 7 Connecticut           3597362  3623355  3626205
- 8 Delaware               992114  1004807  1018396
- 9 District of Columbia   670868   668791   671803
-10 Florida              21589602 21828069 22244823
-# ℹ 42 more rows</code></pre>
-</div>
-</div>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>(<span class="fu">fivenum</span>(state_earthquakes<span class="sc">$</span>YEAR))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 1638 1947 1962 1976 1985</code></pre>
-</div>
-</div>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Pivot the table so we have one row per year and state</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>population_per_state <span class="ot">&lt;-</span> state_pop <span class="sc">%&gt;%</span></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">starts_with</span>(<span class="st">"x"</span>),</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">"year"</span>,</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">values_to =</span> <span class="st">"population"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(State, year)</span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the updated data frame</span></span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>population_per_state</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 156 × 3
-   State    year  population
-   &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt;
- 1 Alabama  x2020    5031362
- 2 Alabama  x2021    5049846
- 3 Alabama  x2022    5074296
- 4 Alaska   x2020     732923
- 5 Alaska   x2021     734182
- 6 Alaska   x2022     733583
- 7 Arizona  x2020    7179943
- 8 Arizona  x2021    7264877
- 9 Arizona  x2022    7359197
-10 Arkansas x2020    3014195
-# ℹ 146 more rows</code></pre>
-</div>
-</div>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Remove the 'x' and '.'</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>population_per_state <span class="ot">&lt;-</span> population_per_state <span class="sc">%&gt;%</span></span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">year =</span> <span class="fu">as.numeric</span>(<span class="fu">str_remove</span>(year, <span class="st">"x"</span>)))</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>population_per_state</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 156 × 3
-   State     year population
-   &lt;chr&gt;    &lt;dbl&gt;      &lt;dbl&gt;
- 1 Alabama   2020    5031362
- 2 Alabama   2021    5049846
- 3 Alabama   2022    5074296
- 4 Alaska    2020     732923
- 5 Alaska    2021     734182
- 6 Alaska    2022     733583
- 7 Arizona   2020    7179943
- 8 Arizona   2021    7264877
- 9 Arizona   2022    7359197
-10 Arkansas  2020    3014195
-# ℹ 146 more rows</code></pre>
-</div>
-</div>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>state_earthquakes_selected <span class="ot">&lt;-</span> state_earthquakes <span class="sc">%&gt;%</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(NAME,MAGNITUDE)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Group by state, calculate the average magnitude across all years</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Assuming your data frame is named 'your_data'</span></span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Drop rows with NA values</span></span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>state_earthquakes_selected_cleaned <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(state_earthquakes_selected)</span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Select one row per state, grouping by and getting the average</span></span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>one_per_state  <span class="ot">&lt;-</span> state_earthquakes_selected_cleaned <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">col_a =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="at">state =</span> NAME, <span class="at">magnitude=</span>MAGNITUDE) <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(state) <span class="sc">%&gt;%</span> <span class="fu">summarise</span>(<span class="at">magnitude=</span><span class="fu">mean</span>(magnitude))</span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(one_per_state, <span class="fu">aes</span>(<span class="at">x =</span> magnitude)) <span class="sc">+</span></span>
-<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="fu">aes</span>(<span class="at">y=</span><span class="fu">fct_reorder</span>(state, magnitude)),<span class="at">fill =</span> <span class="st">"skyblue"</span>) <span class="sc">+</span></span>
-<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Average Magnitude Per State for 1638-1985"</span>, <span class="at">x =</span>  <span class="st">"Average Magnitude"</span>, <span class="at">y =</span> <span class="st">"State"</span>) <span class="sc">+</span></span>
-<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output-display">
-<p><img src="results_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="960"></p>
+<p><img src="results_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="960"></p>
 </div>
 </div>
 <p>As we can see, the average magnitude of earth quakes is highest in Idaho This is interesting because it seems as though the highest magnitutde earthquakes occur on the west coast. Nevada, Utah, Washington are also all on the west coast, which brings up the argument that states on the west coast are more impacted by Earthquakes, in terms of how strong they are. There could be an argument that these states have a higher population than others so we will verify that soon.</p>
 <div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> state_earthquakes <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">DECADE_START =</span> YEAR <span class="sc">-</span> YEAR <span class="sc">%%</span> <span class="dv">10</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drop_na</span>(MAGNITUDE) <span class="sc">%&gt;%</span> </span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(DECADE_START, YEAR, MONTH, DAY, STATE) <span class="sc">%&gt;%</span> </span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">MAGNITUDE=</span><span class="fu">mean</span>(MAGNITUDE)) <span class="sc">%&gt;%</span> </span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">YEAR =</span> <span class="fu">as.factor</span>(YEAR), <span class="at">DECADE_START =</span> <span class="fu">as.factor</span>(DECADE_START)) <span class="sc">%&gt;%</span> </span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="fu">aes</span>(<span class="at">y=</span>MAGNITUDE, <span class="at">x=</span>DECADE_START), <span class="at">varwidth =</span> <span class="cn">TRUE</span>, <span class="at">outlier.size =</span> <span class="fl">0.1</span>, <span class="at">fill=</span><span class="st">"red"</span>, <span class="at">alpha=</span><span class="fl">0.5</span>) <span class="sc">+</span> </span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_linedraw</span>() <span class="sc">+</span> </span>
-<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">vjust =</span> <span class="fl">0.5</span>, <span class="at">hjust=</span><span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stderr">
-<pre><code>`summarise()` has grouped output by 'DECADE_START', 'YEAR', 'MONTH', 'DAY'. You
-can override using the `.groups` argument.</code></pre>
-</div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> state_earthquakes <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">DECADE_START =</span> YEAR <span class="sc">-</span> YEAR <span class="sc">%%</span> <span class="dv">10</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">drop_na</span>(MAGNITUDE) <span class="sc">%&gt;%</span> </span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(YEAR, MONTH, DAY, NAME) <span class="sc">%&gt;%</span> </span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">MAGNITUDE=</span><span class="fu">mean</span>(MAGNITUDE)) <span class="sc">%&gt;%</span> </span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">YEAR =</span> <span class="fu">as.factor</span>(YEAR)) <span class="sc">%&gt;%</span> </span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_boxplot</span>(<span class="fu">aes</span>(<span class="at">y=</span>MAGNITUDE, <span class="at">x=</span><span class="fu">reorder</span>(NAME, <span class="sc">-</span>MAGNITUDE, mean)), <span class="at">varwidth =</span> <span class="cn">TRUE</span>, <span class="at">outlier.size =</span> <span class="fl">0.1</span>, <span class="at">fill=</span><span class="st">"red"</span>, <span class="at">alpha=</span><span class="fl">0.5</span>) <span class="sc">+</span> </span>
-<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_linedraw</span>() <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">vjust =</span> <span class="fl">0.5</span>, <span class="at">hjust=</span><span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stderr">
-<pre><code>`summarise()` has grouped output by 'YEAR', 'MONTH', 'DAY'. You can override
-using the `.groups` argument.</code></pre>
-</div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>p1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output-display">
-<p><img src="results_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
+<p><img src="results_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="1440"></p>
 </div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>p2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
+</div>
+<p>The plot above shows the distribution of earthquakes throughout the years. As we can see, the earthquakes initially all shared the same distribution with respect to magnitude, and eventually grew enormously in range and variance. This makes sense as the decades progressed the technology of detection did too and therefore the measurements became more accurate. Turning to the figure on the bottom, we’re able to see that California is the most variable state in terms of Magntitude of earthquakes. This makes sense because it is the largest state in America and thus naturally have the most variable earthquakes. The plot on the right also displays how the N.A (unkown state) has a large proportion of earthquakes in the dataset. This is the result of the earthquakes being in the ocean which would be difficult to attribute to one particular state.</p>
+<div class="cell">
 <div class="cell-output-display">
-<p><img src="results_files/figure-html/unnamed-chunk-11-2.png" class="img-fluid" width="672"></p>
+<div id="htmlwidget-6b84fe2266b2e1a9562b" style="width:100%;height:568px;" class="plotly html-widget "></div>
+<script type="application/json" data-for="htmlwidget-6b84fe2266b2e1a9562b">{"x":{"data":[{"x":[1],"y":[6],"text":"Count:     1<br />fct_rev(NAME): Massachusetts<br />DECADE_START: 1650","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(239,243,255,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(239,243,255,1)"}},"hoveron":"points","name":"1650","legendgroup":"1650","showlegend":true,"xaxis":"x2","yaxis":"y2","hoverinfo":"text","frame":null},{"x":[8],"y":[6],"text":"Count:     8<br />fct_rev(NAME): Massachusetts<br />DECADE_START: 1700","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(198,219,239,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(198,219,239,1)"}},"hoveron":"points","name":"1700","legendgroup":"1700","showlegend":true,"xaxis":"x2","yaxis":"y2","hoverinfo":"text","frame":null},{"x":[4],"y":[6],"text":"Count:     4<br />fct_rev(NAME): New Jersey<br />DECADE_START: 1700","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(198,219,239,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(198,219,239,1)"}},"hoveron":"points","name":"1700","legendgroup":"1700","showlegend":false,"xaxis":"x3","yaxis":"y3","hoverinfo":"text","frame":null},{"x":[8,2],"y":[10,1],"text":["Count:     8<br />fct_rev(NAME): Connecticut<br />DECADE_START: 1750","Count:     2<br />fct_rev(NAME): Maryland<br />DECADE_START: 1750"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(158,202,225,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(158,202,225,1)"}},"hoveron":"points","name":"1750","legendgroup":"1750","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[4],"y":[3],"text":"Count:     4<br />fct_rev(NAME): Virginia<br />DECADE_START: 1750","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(158,202,225,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(158,202,225,1)"}},"hoveron":"points","name":"1750","legendgroup":"1750","showlegend":false,"xaxis":"x3","yaxis":"y3","hoverinfo":"text","frame":null},{"x":[4,1],"y":[11,6],"text":["Count:     4<br />fct_rev(NAME): Illinois<br />DECADE_START: 1750","Count:     1<br />fct_rev(NAME): Alaska<br />DECADE_START: 1750"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(158,202,225,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(158,202,225,1)"}},"hoveron":"points","name":"1750","legendgroup":"1750","showlegend":false,"xaxis":"x4","yaxis":"y4","hoverinfo":"text","frame":null},{"x":[1],"y":[1],"text":"Count:     1<br />fct_rev(NAME): California<br />DECADE_START: 1750","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(158,202,225,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(158,202,225,1)"}},"hoveron":"points","name":"1750","legendgroup":"1750","showlegend":false,"xaxis":"x5","yaxis":"y5","hoverinfo":"text","frame":null},{"x":[8],"y":[10],"text":"Count:     8<br />fct_rev(NAME): Connecticut<br />DECADE_START: 1800","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(107,174,214,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(107,174,214,1)"}},"hoveron":"points","name":"1800","legendgroup":"1800","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[5,2],"y":[6,1],"text":["Count:     5<br />fct_rev(NAME): Massachusetts<br />DECADE_START: 1800","Count:     2<br />fct_rev(NAME): Indiana<br />DECADE_START: 1800"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(107,174,214,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(107,174,214,1)"}},"hoveron":"points","name":"1800","legendgroup":"1800","showlegend":false,"xaxis":"x2","yaxis":"y2","hoverinfo":"text","frame":null},{"x":[23,4,2,1],"y":[11,6,5,4],"text":["Count:    23<br />fct_rev(NAME): Tennessee<br />DECADE_START: 1800","Count:     4<br />fct_rev(NAME): New Jersey<br />DECADE_START: 1800","Count:     2<br />fct_rev(NAME): Maine<br />DECADE_START: 1800","Count:     1<br />fct_rev(NAME): Oregon<br />DECADE_START: 1800"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(107,174,214,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(107,174,214,1)"}},"hoveron":"points","name":"1800","legendgroup":"1800","showlegend":false,"xaxis":"x3","yaxis":"y3","hoverinfo":"text","frame":null},{"x":[3,115,5,1,5],"y":[11,5,4,3,1],"text":["Count:     3<br />fct_rev(NAME): Illinois<br />DECADE_START: 1800","Count:   115<br />fct_rev(NAME): Missouri<br />DECADE_START: 1800","Count:     5<br />fct_rev(NAME): Arkansas<br />DECADE_START: 1800","Count:     1<br />fct_rev(NAME): Kentucky<br />DECADE_START: 1800","Count:     5<br />fct_rev(NAME): New Hampshire<br />DECADE_START: 1800"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(107,174,214,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(107,174,214,1)"}},"hoveron":"points","name":"1800","legendgroup":"1800","showlegend":false,"xaxis":"x4","yaxis":"y4","hoverinfo":"text","frame":null},{"x":[10],"y":[1],"text":"Count:    10<br />fct_rev(NAME): California<br />DECADE_START: 1800","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(107,174,214,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(107,174,214,1)"}},"hoveron":"points","name":"1800","legendgroup":"1800","showlegend":false,"xaxis":"x5","yaxis":"y5","hoverinfo":"text","frame":null},{"x":[7,4,14,3,5,6,9,3],"y":[13,12,11,10,9,6,2,1],"text":["Count:     7<br />fct_rev(NAME): Vermont<br />DECADE_START: 1850","Count:     4<br />fct_rev(NAME): Rhode Island<br />DECADE_START: 1850","Count:    14<br />fct_rev(NAME): Kansas<br />DECADE_START: 1850","Count:     3<br />fct_rev(NAME): Connecticut<br />DECADE_START: 1850","Count:     5<br />fct_rev(NAME): Florida<br />DECADE_START: 1850","Count:     6<br />fct_rev(NAME): Michigan<br />DECADE_START: 1850","Count:     9<br />fct_rev(NAME): Delaware<br />DECADE_START: 1850","Count:     3<br />fct_rev(NAME): Maryland<br />DECADE_START: 1850"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(66,146,198,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(66,146,198,1)"}},"hoveron":"points","name":"1850","legendgroup":"1850","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[18,1,8,2,11,22,16,9],"y":[12,9,8,7,6,4,2,1],"text":["Count:    18<br />fct_rev(NAME): North Carolina<br />DECADE_START: 1850","Count:     1<br />fct_rev(NAME): South Dakota<br />DECADE_START: 1850","Count:     8<br />fct_rev(NAME): Georgia<br />DECADE_START: 1850","Count:     2<br />fct_rev(NAME): Alabama<br />DECADE_START: 1850","Count:    11<br />fct_rev(NAME): Massachusetts<br />DECADE_START: 1850","Count:    22<br />fct_rev(NAME): Nebraska<br />DECADE_START: 1850","Count:    16<br />fct_rev(NAME): Ohio<br />DECADE_START: 1850","Count:     9<br />fct_rev(NAME): Indiana<br />DECADE_START: 1850"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(66,146,198,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(66,146,198,1)"}},"hoveron":"points","name":"1850","legendgroup":"1850","showlegend":false,"xaxis":"x2","yaxis":"y2","hoverinfo":"text","frame":null},{"x":[6,2,6,1,7,1051,7,7,8,51,3,1],"y":[12,11,10,9,8,7,6,5,4,3,2,1],"text":["Count:     6<br />fct_rev(NAME): Colorado<br />DECADE_START: 1850","Count:     2<br />fct_rev(NAME): Tennessee<br />DECADE_START: 1850","Count:     6<br />fct_rev(NAME): Utah<br />DECADE_START: 1850","Count:     1<br />fct_rev(NAME): Wyoming<br />DECADE_START: 1850","Count:     7<br />fct_rev(NAME): Pennsylvania<br />DECADE_START: 1850","Count:  1051<br />fct_rev(NAME): South Carolina<br />DECADE_START: 1850","Count:     7<br />fct_rev(NAME): New Jersey<br />DECADE_START: 1850","Count:     7<br />fct_rev(NAME): Maine<br />DECADE_START: 1850","Count:     8<br />fct_rev(NAME): Oregon<br />DECADE_START: 1850","Count:    51<br />fct_rev(NAME): Virginia<br />DECADE_START: 1850","Count:     3<br />fct_rev(NAME): New Mexico<br />DECADE_START: 1850","Count:     1<br />fct_rev(NAME): Texas<br />DECADE_START: 1850"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(66,146,198,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(66,146,198,1)"}},"hoveron":"points","name":"1850","legendgroup":"1850","showlegend":false,"xaxis":"x3","yaxis":"y3","hoverinfo":"text","frame":null},{"x":[5,39,46,8,18,18,27,8,5,14],"y":[12,11,9,8,7,6,5,4,3,1],"text":["Count:     5<br />fct_rev(NAME): Washington<br />DECADE_START: 1850","Count:    39<br />fct_rev(NAME): Illinois<br />DECADE_START: 1850","Count:    46<br />fct_rev(NAME): New York<br />DECADE_START: 1850","Count:     8<br />fct_rev(NAME): Montana<br />DECADE_START: 1850","Count:    18<br />fct_rev(NAME): Nevada<br />DECADE_START: 1850","Count:    18<br />fct_rev(NAME): Alaska<br />DECADE_START: 1850","Count:    27<br />fct_rev(NAME): Missouri<br />DECADE_START: 1850","Count:     8<br />fct_rev(NAME): Arkansas<br />DECADE_START: 1850","Count:     5<br />fct_rev(NAME): Kentucky<br />DECADE_START: 1850","Count:    14<br />fct_rev(NAME): New Hampshire<br />DECADE_START: 1850"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(66,146,198,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(66,146,198,1)"}},"hoveron":"points","name":"1850","legendgroup":"1850","showlegend":false,"xaxis":"x4","yaxis":"y4","hoverinfo":"text","frame":null},{"x":[286],"y":[1],"text":"Count:   286<br />fct_rev(NAME): California<br />DECADE_START: 1850","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(66,146,198,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(66,146,198,1)"}},"hoveron":"points","name":"1850","legendgroup":"1850","showlegend":false,"xaxis":"x5","yaxis":"y5","hoverinfo":"text","frame":null},{"x":[10,1,43,23,3,27,136,44,11,5,4],"y":[13,12,11,10,9,7,6,5,3,2,1],"text":["Count:    10<br />fct_rev(NAME): Vermont<br />DECADE_START: 1900","Count:     1<br />fct_rev(NAME): Rhode Island<br />DECADE_START: 1900","Count:    43<br />fct_rev(NAME): Kansas<br />DECADE_START: 1900","Count:    23<br />fct_rev(NAME): Connecticut<br />DECADE_START: 1900","Count:     3<br />fct_rev(NAME): Florida<br />DECADE_START: 1900","Count:    27<br />fct_rev(NAME): Iowa<br />DECADE_START: 1900","Count:   136<br />fct_rev(NAME): Michigan<br />DECADE_START: 1900","Count:    44<br />fct_rev(NAME): Louisiana<br />DECADE_START: 1900","Count:    11<br />fct_rev(NAME): Wisconsin<br />DECADE_START: 1900","Count:     5<br />fct_rev(NAME): Delaware<br />DECADE_START: 1900","Count:     4<br />fct_rev(NAME): Maryland<br />DECADE_START: 1900"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(33,113,181,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(33,113,181,1)"}},"hoveron":"points","name":"1900","legendgroup":"1900","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[24,138,31,15,5,152,95,47,309,104,408,85],"y":[13,12,10,9,8,7,6,5,4,3,2,1],"text":["Count:    24<br />fct_rev(NAME): Oklahoma<br />DECADE_START: 1900","Count:   138<br />fct_rev(NAME): North Carolina<br />DECADE_START: 1900","Count:    31<br />fct_rev(NAME): Minnesota<br />DECADE_START: 1900","Count:    15<br />fct_rev(NAME): South Dakota<br />DECADE_START: 1900","Count:     5<br />fct_rev(NAME): Georgia<br />DECADE_START: 1900","Count:   152<br />fct_rev(NAME): Alabama<br />DECADE_START: 1900","Count:    95<br />fct_rev(NAME): Massachusetts<br />DECADE_START: 1900","Count:    47<br />fct_rev(NAME): Arizona<br />DECADE_START: 1900","Count:   309<br />fct_rev(NAME): Nebraska<br />DECADE_START: 1900","Count:   104<br />fct_rev(NAME): Mississippi<br />DECADE_START: 1900","Count:   408<br />fct_rev(NAME): Ohio<br />DECADE_START: 1900","Count:    85<br />fct_rev(NAME): Indiana<br />DECADE_START: 1900"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(33,113,181,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(33,113,181,1)"}},"hoveron":"points","name":"1900","legendgroup":"1900","showlegend":false,"xaxis":"x2","yaxis":"y2","hoverinfo":"text","frame":null},{"x":[59,202,522,50,4,81,264,281,303,61,119,496],"y":[12,11,10,9,8,7,6,5,4,3,2,1],"text":["Count:    59<br />fct_rev(NAME): Colorado<br />DECADE_START: 1900","Count:   202<br />fct_rev(NAME): Tennessee<br />DECADE_START: 1900","Count:   522<br />fct_rev(NAME): Utah<br />DECADE_START: 1900","Count:    50<br />fct_rev(NAME): Wyoming<br />DECADE_START: 1900","Count:     4<br />fct_rev(NAME): Pennsylvania<br />DECADE_START: 1900","Count:    81<br />fct_rev(NAME): South Carolina<br />DECADE_START: 1900","Count:   264<br />fct_rev(NAME): New Jersey<br />DECADE_START: 1900","Count:   281<br />fct_rev(NAME): Maine<br />DECADE_START: 1900","Count:   303<br />fct_rev(NAME): Oregon<br />DECADE_START: 1900","Count:    61<br />fct_rev(NAME): Virginia<br />DECADE_START: 1900","Count:   119<br />fct_rev(NAME): New Mexico<br />DECADE_START: 1900","Count:   496<br />fct_rev(NAME): Texas<br />DECADE_START: 1900"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(33,113,181,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(33,113,181,1)"}},"hoveron":"points","name":"1900","legendgroup":"1900","showlegend":false,"xaxis":"x3","yaxis":"y3","hoverinfo":"text","frame":null},{"x":[1882,197,105,825,2266,1694,237,279,140,122,375,453],"y":[12,11,10,9,8,7,6,5,4,3,2,1],"text":["Count:  1882<br />fct_rev(NAME): Washington<br />DECADE_START: 1900","Count:   197<br />fct_rev(NAME): Illinois<br />DECADE_START: 1900","Count:   105<br />fct_rev(NAME): Hawaii<br />DECADE_START: 1900","Count:   825<br />fct_rev(NAME): New York<br />DECADE_START: 1900","Count:  2266<br />fct_rev(NAME): Montana<br />DECADE_START: 1900","Count:  1694<br />fct_rev(NAME): Nevada<br />DECADE_START: 1900","Count:   237<br />fct_rev(NAME): Alaska<br />DECADE_START: 1900","Count:   279<br />fct_rev(NAME): Missouri<br />DECADE_START: 1900","Count:   140<br />fct_rev(NAME): Arkansas<br />DECADE_START: 1900","Count:   122<br />fct_rev(NAME): Kentucky<br />DECADE_START: 1900","Count:   375<br />fct_rev(NAME): Idaho<br />DECADE_START: 1900","Count:   453<br />fct_rev(NAME): New Hampshire<br />DECADE_START: 1900"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(33,113,181,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(33,113,181,1)"}},"hoveron":"points","name":"1900","legendgroup":"1900","showlegend":false,"xaxis":"x4","yaxis":"y4","hoverinfo":"text","frame":null},{"x":[16562],"y":[1],"text":"Count: 16562<br />fct_rev(NAME): California<br />DECADE_START: 1900","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(33,113,181,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(33,113,181,1)"}},"hoveron":"points","name":"1900","legendgroup":"1900","showlegend":false,"xaxis":"x5","yaxis":"y5","hoverinfo":"text","frame":null},{"x":[141,78,71,55,51,40,18,15,13,6],"y":[13,12,11,10,9,8,6,5,4,2],"text":["Count:   141<br />fct_rev(NAME): Vermont<br />DECADE_START: 1950","Count:    78<br />fct_rev(NAME): Rhode Island<br />DECADE_START: 1950","Count:    71<br />fct_rev(NAME): Kansas<br />DECADE_START: 1950","Count:    55<br />fct_rev(NAME): Connecticut<br />DECADE_START: 1950","Count:    51<br />fct_rev(NAME): Florida<br />DECADE_START: 1950","Count:    40<br />fct_rev(NAME): Puerto Rico<br />DECADE_START: 1950","Count:    18<br />fct_rev(NAME): Michigan<br />DECADE_START: 1950","Count:    15<br />fct_rev(NAME): Louisiana<br />DECADE_START: 1950","Count:    13<br />fct_rev(NAME): North Dakota<br />DECADE_START: 1950","Count:     6<br />fct_rev(NAME): Delaware<br />DECADE_START: 1950"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(8,69,148,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(8,69,148,1)"}},"hoveron":"points","name":"1950","legendgroup":"1950","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[496,325,295,259,247,169,167,157,136,109,92,89,68],"y":[13,12,11,10,9,8,7,6,5,4,3,2,1],"text":["Count:   496<br />fct_rev(NAME): Oklahoma<br />DECADE_START: 1950","Count:   325<br />fct_rev(NAME): North Carolina<br />DECADE_START: 1950","Count:   295<br />fct_rev(NAME): West Virginia<br />DECADE_START: 1950","Count:   259<br />fct_rev(NAME): Minnesota<br />DECADE_START: 1950","Count:   247<br />fct_rev(NAME): South Dakota<br />DECADE_START: 1950","Count:   169<br />fct_rev(NAME): Georgia<br />DECADE_START: 1950","Count:   167<br />fct_rev(NAME): Alabama<br />DECADE_START: 1950","Count:   157<br />fct_rev(NAME): Massachusetts<br />DECADE_START: 1950","Count:   136<br />fct_rev(NAME): Arizona<br />DECADE_START: 1950","Count:   109<br />fct_rev(NAME): Nebraska<br />DECADE_START: 1950","Count:    92<br />fct_rev(NAME): Mississippi<br />DECADE_START: 1950","Count:    89<br />fct_rev(NAME): Ohio<br />DECADE_START: 1950","Count:    68<br />fct_rev(NAME): Indiana<br />DECADE_START: 1950"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(8,69,148,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(8,69,148,1)"}},"hoveron":"points","name":"1950","legendgroup":"1950","showlegend":false,"xaxis":"x2","yaxis":"y2","hoverinfo":"text","frame":null},{"x":[1469,1314,1242,1089,820,605,555,545,486,468,399,208],"y":[12,11,10,9,8,7,6,5,4,3,2,1],"text":["Count:  1469<br />fct_rev(NAME): Colorado<br />DECADE_START: 1950","Count:  1314<br />fct_rev(NAME): Tennessee<br />DECADE_START: 1950","Count:  1242<br />fct_rev(NAME): Utah<br />DECADE_START: 1950","Count:  1089<br />fct_rev(NAME): Wyoming<br />DECADE_START: 1950","Count:   820<br />fct_rev(NAME): Pennsylvania<br />DECADE_START: 1950","Count:   605<br />fct_rev(NAME): South Carolina<br />DECADE_START: 1950","Count:   555<br />fct_rev(NAME): New Jersey<br />DECADE_START: 1950","Count:   545<br />fct_rev(NAME): Maine<br />DECADE_START: 1950","Count:   486<br />fct_rev(NAME): Oregon<br />DECADE_START: 1950","Count:   468<br />fct_rev(NAME): Virginia<br />DECADE_START: 1950","Count:   399<br />fct_rev(NAME): New Mexico<br />DECADE_START: 1950","Count:   208<br />fct_rev(NAME): Texas<br />DECADE_START: 1950"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(8,69,148,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(8,69,148,1)"}},"hoveron":"points","name":"1950","legendgroup":"1950","showlegend":false,"xaxis":"x3","yaxis":"y3","hoverinfo":"text","frame":null},{"x":[6690,4780,4588,3648,3393,2980,2800,2122,1844,1664,1634,1313],"y":[12,11,10,9,8,7,6,5,4,3,2,1],"text":["Count:  6690<br />fct_rev(NAME): Washington<br />DECADE_START: 1950","Count:  4780<br />fct_rev(NAME): Illinois<br />DECADE_START: 1950","Count:  4588<br />fct_rev(NAME): Hawaii<br />DECADE_START: 1950","Count:  3648<br />fct_rev(NAME): New York<br />DECADE_START: 1950","Count:  3393<br />fct_rev(NAME): Montana<br />DECADE_START: 1950","Count:  2980<br />fct_rev(NAME): Nevada<br />DECADE_START: 1950","Count:  2800<br />fct_rev(NAME): Alaska<br />DECADE_START: 1950","Count:  2122<br />fct_rev(NAME): Missouri<br />DECADE_START: 1950","Count:  1844<br />fct_rev(NAME): Arkansas<br />DECADE_START: 1950","Count:  1664<br />fct_rev(NAME): Kentucky<br />DECADE_START: 1950","Count:  1634<br />fct_rev(NAME): Idaho<br />DECADE_START: 1950","Count:  1313<br />fct_rev(NAME): New Hampshire<br />DECADE_START: 1950"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(8,69,148,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(8,69,148,1)"}},"hoveron":"points","name":"1950","legendgroup":"1950","showlegend":false,"xaxis":"x4","yaxis":"y4","hoverinfo":"text","frame":null},{"x":[39139],"y":[1],"text":"Count: 39139<br />fct_rev(NAME): California<br />DECADE_START: 1950","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(8,69,148,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(8,69,148,1)"}},"hoveron":"points","name":"1950","legendgroup":"1950","showlegend":false,"xaxis":"x5","yaxis":"y5","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":53.573385518590996,"r":7.3059360730593621,"b":38.303979125896944,"l":95.707762557077658},"plot_bgcolor":"rgba(255,255,255,1)","paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"title":{"text":"Earthquake Count Per State for  1638-1985","font":{"color":"rgba(0,0,0,1)","family":"","size":17.534246575342465},"x":0,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-6,148],"tickmode":"array","ticktext":["0","50","100"],"tickvals":[0,50,100],"categoryorder":"array","categoryarray":["0","50","100"],"nticks":null,"ticks":"outside","tickcolor":"rgba(0,0,0,1)","ticklen":3.6529680365296811,"tickwidth":0.33208800332088001,"showticklabels":true,"tickfont":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(0,0,0,1)","gridwidth":0.066417600664176013,"zeroline":false,"anchor":"y","title":"","hoverformat":".2f"},"annotations":[{"text":"Earthquake Count","x":0.5,"y":0,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"top","annotationType":"axis","yshift":-21.917808219178088},{"text":"State","x":0,"y":0.5,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"xref":"paper","yref":"paper","textangle":-90,"xanchor":"right","yanchor":"center","annotationType":"axis","xshift":-80.365296803652967},{"text":"1","x":0.5,"y":1,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(255,255,255,1)","family":"","size":11.68949771689498},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"},{"text":"2","x":0.5,"y":0.76676747909624621,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(255,255,255,1)","family":"","size":11.68949771689498},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"},{"text":"3","x":0.5,"y":0.56676747909624614,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(255,255,255,1)","family":"","size":11.68949771689498},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"},{"text":"4","x":0.5,"y":0.36676747909624613,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(255,255,255,1)","family":"","size":11.68949771689498},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"},{"text":"CA","x":0.5,"y":0.16676747909624617,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(255,255,255,1)","family":"","size":11.68949771689498},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"}],"yaxis":{"domain":[0.83323252090375388,1],"automargin":true,"type":"linear","autorange":false,"range":[0.40000000000000002,13.6],"tickmode":"array","ticktext":["Maryland","Delaware","Wisconsin","North Dakota","Louisiana","Michigan","Iowa","Puerto Rico","Florida","Connecticut","Kansas","Rhode Island","Vermont"],"tickvals":[1,2,3,4,5,6,7,8,9,10,11,12,13],"categoryorder":"array","categoryarray":["Maryland","Delaware","Wisconsin","North Dakota","Louisiana","Michigan","Iowa","Puerto Rico","Florida","Connecticut","Kansas","Rhode Island","Vermont"],"nticks":null,"ticks":"outside","tickcolor":"rgba(0,0,0,1)","ticklen":3.6529680365296811,"tickwidth":0.33208800332088001,"showticklabels":true,"tickfont":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(0,0,0,1)","gridwidth":0.066417600664176027,"zeroline":false,"anchor":"x","title":"","hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":"transparent","line":{"color":"rgba(0,0,0,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0.83323252090375388,"y1":1},{"type":"rect","fillcolor":"rgba(0,0,0,1)","line":{"color":"rgba(0,0,0,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":23.37899543378996,"yanchor":1,"ysizemode":"pixel"},{"type":"rect","fillcolor":"transparent","line":{"color":"rgba(0,0,0,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0.63323252090375381,"y1":0.76676747909624621},{"type":"rect","fillcolor":"rgba(0,0,0,1)","line":{"color":"rgba(0,0,0,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":23.37899543378996,"yanchor":0.76676747909624621,"ysizemode":"pixel"},{"type":"rect","fillcolor":"transparent","line":{"color":"rgba(0,0,0,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0.43323252090375369,"y1":0.56676747909624614},{"type":"rect","fillcolor":"rgba(0,0,0,1)","line":{"color":"rgba(0,0,0,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":23.37899543378996,"yanchor":0.56676747909624614,"ysizemode":"pixel"},{"type":"rect","fillcolor":"transparent","line":{"color":"rgba(0,0,0,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0.23323252090375374,"y1":0.36676747909624613},{"type":"rect","fillcolor":"rgba(0,0,0,1)","line":{"color":"rgba(0,0,0,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":23.37899543378996,"yanchor":0.36676747909624613,"ysizemode":"pixel"},{"type":"rect","fillcolor":"transparent","line":{"color":"rgba(0,0,0,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":0.16676747909624617},{"type":"rect","fillcolor":"rgba(0,0,0,1)","line":{"color":"rgba(0,0,0,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":23.37899543378996,"yanchor":0.16676747909624617,"ysizemode":"pixel"}],"xaxis2":{"type":"linear","autorange":false,"range":[-23.75,520.75],"tickmode":"array","ticktext":["0","100","200","300","400","500"],"tickvals":[0,100,200,300,400,500],"categoryorder":"array","categoryarray":["0","100","200","300","400","500"],"nticks":null,"ticks":"outside","tickcolor":"rgba(0,0,0,1)","ticklen":3.6529680365296811,"tickwidth":0.33208800332088001,"showticklabels":true,"tickfont":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"domain":[0,1],"gridcolor":"rgba(0,0,0,1)","gridwidth":0.066417600664176013,"zeroline":false,"anchor":"y2","title":"","hoverformat":".2f"},"yaxis2":{"type":"linear","autorange":false,"range":[0.40000000000000002,13.6],"tickmode":"array","ticktext":["Indiana","Ohio","Mississippi","Nebraska","Arizona","Massachusetts","Alabama","Georgia","South Dakota","Minnesota","West Virginia","North Carolina","Oklahoma"],"tickvals":[1,2,3,4,5,6,7,8,9,10,11,12,13],"categoryorder":"array","categoryarray":["Indiana","Ohio","Mississippi","Nebraska","Arizona","Massachusetts","Alabama","Georgia","South Dakota","Minnesota","West Virginia","North Carolina","Oklahoma"],"nticks":null,"ticks":"outside","tickcolor":"rgba(0,0,0,1)","ticklen":3.6529680365296811,"tickwidth":0.33208800332088001,"showticklabels":true,"tickfont":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"domain":[0.63323252090375381,0.76676747909624621],"gridcolor":"rgba(0,0,0,1)","gridwidth":0.066417600664176027,"zeroline":false,"anchor":"x2","title":"","hoverformat":".2f"},"xaxis3":{"type":"linear","autorange":false,"range":[-72.400000000000006,1542.4000000000001],"tickmode":"array","ticktext":["0","500","1000","1500"],"tickvals":[0,500,1000.0000000000001,1500],"categoryorder":"array","categoryarray":["0","500","1000","1500"],"nticks":null,"ticks":"outside","tickcolor":"rgba(0,0,0,1)","ticklen":3.6529680365296811,"tickwidth":0.33208800332088001,"showticklabels":true,"tickfont":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"domain":[0,1],"gridcolor":"rgba(0,0,0,1)","gridwidth":0.066417600664176013,"zeroline":false,"anchor":"y3","title":"","hoverformat":".2f"},"yaxis3":{"type":"linear","autorange":false,"range":[0.40000000000000002,12.6],"tickmode":"array","ticktext":["Texas","New Mexico","Virginia","Oregon","Maine","New Jersey","South Carolina","Pennsylvania","Wyoming","Utah","Tennessee","Colorado"],"tickvals":[1,2,3,4.0000000000000009,5,6,7.0000000000000009,8,9,10,11,12],"categoryorder":"array","categoryarray":["Texas","New Mexico","Virginia","Oregon","Maine","New Jersey","South Carolina","Pennsylvania","Wyoming","Utah","Tennessee","Colorado"],"nticks":null,"ticks":"outside","tickcolor":"rgba(0,0,0,1)","ticklen":3.6529680365296811,"tickwidth":0.33208800332088001,"showticklabels":true,"tickfont":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"domain":[0.43323252090375369,0.56676747909624614],"gridcolor":"rgba(0,0,0,1)","gridwidth":0.066417600664176027,"zeroline":false,"anchor":"x3","title":"","hoverformat":".2f"},"xaxis4":{"type":"linear","autorange":false,"range":[-333.45000000000005,7024.4499999999998],"tickmode":"array","ticktext":["0","2000","4000","6000"],"tickvals":[0,1999.9999999999998,4000,6000],"categoryorder":"array","categoryarray":["0","2000","4000","6000"],"nticks":null,"ticks":"outside","tickcolor":"rgba(0,0,0,1)","ticklen":3.6529680365296811,"tickwidth":0.33208800332088001,"showticklabels":true,"tickfont":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"domain":[0,1],"gridcolor":"rgba(0,0,0,1)","gridwidth":0.066417600664176013,"zeroline":false,"anchor":"y4","title":"","hoverformat":".2f"},"yaxis4":{"type":"linear","autorange":false,"range":[0.40000000000000002,12.6],"tickmode":"array","ticktext":["New Hampshire","Idaho","Kentucky","Arkansas","Missouri","Alaska","Nevada","Montana","New York","Hawaii","Illinois","Washington"],"tickvals":[1,2,3,4.0000000000000009,5,6,7.0000000000000009,8,9,10,11,12],"categoryorder":"array","categoryarray":["New Hampshire","Idaho","Kentucky","Arkansas","Missouri","Alaska","Nevada","Montana","New York","Hawaii","Illinois","Washington"],"nticks":null,"ticks":"outside","tickcolor":"rgba(0,0,0,1)","ticklen":3.6529680365296811,"tickwidth":0.33208800332088001,"showticklabels":true,"tickfont":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"domain":[0.23323252090375374,0.36676747909624613],"gridcolor":"rgba(0,0,0,1)","gridwidth":0.066417600664176027,"zeroline":false,"anchor":"x4","title":"","hoverformat":".2f"},"xaxis5":{"type":"linear","autorange":false,"range":[-1955.9000000000001,41095.900000000001],"tickmode":"array","ticktext":["0","10000","20000","30000","40000"],"tickvals":[-2.2737367544323206e-13,10000,20000,30000,40000],"categoryorder":"array","categoryarray":["0","10000","20000","30000","40000"],"nticks":null,"ticks":"outside","tickcolor":"rgba(0,0,0,1)","ticklen":3.6529680365296811,"tickwidth":0.33208800332088001,"showticklabels":true,"tickfont":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"domain":[0,1],"gridcolor":"rgba(0,0,0,1)","gridwidth":0.066417600664176013,"zeroline":false,"anchor":"y5","title":"","hoverformat":".2f"},"yaxis5":{"type":"linear","autorange":false,"range":[0.40000000000000002,1.6000000000000001],"tickmode":"array","ticktext":["California"],"tickvals":[1],"categoryorder":"array","categoryarray":["California"],"nticks":null,"ticks":"outside","tickcolor":"rgba(0,0,0,1)","ticklen":3.6529680365296811,"tickwidth":0.33208800332088001,"showticklabels":true,"tickfont":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"domain":[0,0.16676747909624617],"gridcolor":"rgba(0,0,0,1)","gridwidth":0.066417600664176027,"zeroline":false,"anchor":"x5","title":"","hoverformat":".2f"},"showlegend":true,"legend":{"bgcolor":"rgba(255,255,255,1)","bordercolor":"transparent","borderwidth":1.8897637795275593,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498},"title":{"text":"DECADE_START","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}}},"hovermode":"closest","width":800,"height":700,"barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"40891986cc7e":{"x":{},"y":{},"colour":{},"type":"scatter"}},"cur_data":"40891986cc7e","visdat":{"40891986cc7e":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
+<p>The way we can interpret this plot is by realizing that each chart represents the quintile of state’s average number of earthquakes, with California isolated. The points represent the counts for a given state and the half-century that the earthquakes that occured. This Clevland dot plot, therefore, allows us to see the distribution of earthquake counts across states and years. We can see that California Largely exceeds all other states for the later decades. Large in part we can also see that later decades have a higher earthquake count. This was a finding consistent with our other charts above. Additionally, California only starts being much higher than the other states in the 1900s onwards, and this behavior is similar across quintiles.</p>
 <div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="do">## use the population from the most recent year</span></span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>newest_year_pop <span class="ot">&lt;-</span> population_per_state <span class="sc">%&gt;%</span> </span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(year <span class="sc">==</span> <span class="fu">max</span>(year)) <span class="sc">%&gt;%</span></span>
-<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>year)  <span class="co"># Drop the 'year' column</span></span>
-<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>newest_year_pop</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 52 × 2
-   State                population
-   &lt;chr&gt;                     &lt;dbl&gt;
- 1 Alabama                 5074296
- 2 Alaska                   733583
- 3 Arizona                 7359197
- 4 Arkansas                3045637
- 5 California             39029342
- 6 Colorado                5839926
- 7 Connecticut             3626205
- 8 Delaware                1018396
- 9 District of Columbia     671803
-10 Florida                22244823
-# ℹ 42 more rows</code></pre>
-</div>
-</div>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Perform left join for population and state. </span></span>
-<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>population_state <span class="ot">&lt;-</span> <span class="fu">left_join</span>(newest_year_pop, state_earthquakes_selected_cleaned, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"State"</span> <span class="ot">=</span> <span class="st">"NAME"</span>))</span>
-<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>population_state</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 93,237 × 3
-   State   population MAGNITUDE
-   &lt;chr&gt;        &lt;dbl&gt;     &lt;dbl&gt;
- 1 Alabama    5074296       3.9
- 2 Alabama    5074296       3.6
- 3 Alabama    5074296       3.6
- 4 Alabama    5074296       3  
- 5 Alabama    5074296       2.5
- 6 Alabama    5074296       2.9
- 7 Alabama    5074296       2.9
- 8 Alabama    5074296       2.9
- 9 Alabama    5074296       2.9
-10 Alabama    5074296       2.9
-# ℹ 93,227 more rows</code></pre>
-</div>
-</div>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Cleaning the table</span></span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>counts_and_average_mag <span class="ot">&lt;-</span> population_state <span class="sc">%&gt;%</span></span>
-<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(State) <span class="sc">%&gt;%</span></span>
-<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">Count =</span> <span class="fu">n</span>(), <span class="at">Average_Magnitude =</span> <span class="fu">mean</span>(MAGNITUDE, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a><span class="co"># counts_and_average_mag &lt;- counts_and_average_mag[-1, ]</span></span>
-<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a><span class="do">## remove rows with numbers</span></span>
-<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>rows_with_numbers <span class="ot">&lt;-</span> <span class="fu">grep</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">d"</span>, counts_and_average_mag<span class="sc">$</span>State)</span>
-<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Remove rows with numbers</span></span>
-<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>counts_and_average_mag <span class="ot">&lt;-</span> counts_and_average_mag[<span class="sc">-</span>rows_with_numbers, ]</span>
-<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Identify rows with ":" in the "State" column</span></span>
-<span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a>rows_with_colon <span class="ot">&lt;-</span> <span class="fu">grepl</span>(<span class="st">":"</span>, counts_and_average_mag<span class="sc">$</span>State)</span>
-<span id="cb34-19"><a href="#cb34-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-20"><a href="#cb34-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Remove rows with ":"</span></span>
-<span id="cb34-21"><a href="#cb34-21" aria-hidden="true" tabindex="-1"></a>counts_and_average_mag <span class="ot">&lt;-</span> counts_and_average_mag[<span class="sc">!</span>rows_with_colon, ]</span>
-<span id="cb34-22"><a href="#cb34-22" aria-hidden="true" tabindex="-1"></a>counts_and_average_mag</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 0 × 3
-# ℹ 3 variables: State &lt;chr&gt;, Count &lt;int&gt;, Average_Magnitude &lt;dbl&gt;</code></pre>
-</div>
-</div>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a horizontal bar chart</span></span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(forcats)</span>
-<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Order the data by frequency in descending order</span></span>
-<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Set wider figure dimensions</span></span>
-<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">repr.plot.width =</span> <span class="dv">10</span>, <span class="at">repr.plot.height =</span> <span class="dv">6</span>)</span>
-<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(counts_and_average_mag, <span class="fu">aes</span>(<span class="at">x =</span> Count)) <span class="sc">+</span></span>
-<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="fu">aes</span>(<span class="at">y=</span><span class="fu">fct_reorder</span>(State, Count)),<span class="at">fill =</span> <span class="st">"skyblue"</span>) <span class="sc">+</span></span>
-<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Earthquake Count Per State for  1638-1985"</span>, <span class="at">x =</span> <span class="st">"Earthquake Count"</span>, <span class="at">y =</span> <span class="st">"State"</span>) <span class="sc">+</span></span>
-<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output-display">
-<p><img src="results_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid" width="960"></p>
+<p><img src="results_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>As we can see, California has the most number of Earthquake’s, next is Washington, then Nevada. As a result the argument regarding western vs eastern regions is still very relevant to this variable. Despite this it is less relevant as New York and Illinois are up there. These are highly populated areas and thus we will see the correlation between population and earthquake count below and average mag.</p>
+<p>We also would like to see the seasonality of earthquakes in the above graph, which shows a bimodal distribution of earthquakes in April and November. This is really interesting, and prompting us to check whether there is seasonality over the years.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>This plot displays the distribution of earthquakes from 1700 to 2023. As you can see, overtime, the frequencies increased which makes sense as measurement and systemic capturing of earthquakes improved.</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>counts_pop_ <span class="ot">&lt;-</span> population_state <span class="sc">%&gt;%</span></span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(State) <span class="sc">%&gt;%</span></span>
-<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">Count =</span> <span class="fu">n</span>(), <span class="at">Average_Magnitude =</span> <span class="fu">mean</span>(MAGNITUDE, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),<span class="at">the_population =</span> <span class="fu">mean</span>(population, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>counts_pop_ <span class="ot">&lt;-</span> counts_pop_[<span class="sc">-</span><span class="dv">1</span>, ]</span>
-<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a><span class="do">## remove rows with numbers</span></span>
-<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>rows_with_numbers <span class="ot">&lt;-</span> <span class="fu">grep</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">d"</span>, counts_pop_<span class="sc">$</span>State)</span>
-<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Remove rows with numbers</span></span>
-<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>counts_pop_ <span class="ot">&lt;-</span> counts_pop_[<span class="sc">-</span>rows_with_numbers, ]</span>
-<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Identify rows with ":" in the "State" column</span></span>
-<span id="cb37-15"><a href="#cb37-15" aria-hidden="true" tabindex="-1"></a>rows_with_colon <span class="ot">&lt;-</span> <span class="fu">grepl</span>(<span class="st">":"</span>, counts_pop_<span class="sc">$</span>State)</span>
-<span id="cb37-16"><a href="#cb37-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb37-17"><a href="#cb37-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Remove rows with ":"</span></span>
-<span id="cb37-18"><a href="#cb37-18" aria-hidden="true" tabindex="-1"></a>counts_pop_ <span class="ot">&lt;-</span> counts_pop_[<span class="sc">!</span>rows_with_colon, ]</span>
-<span id="cb37-19"><a href="#cb37-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb37-20"><a href="#cb37-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb37-21"><a href="#cb37-21" aria-hidden="true" tabindex="-1"></a>counts_pop_<span class="sc">$</span>Count <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">log</span>(counts_pop_<span class="sc">$</span>Count))</span>
-<span id="cb37-22"><a href="#cb37-22" aria-hidden="true" tabindex="-1"></a>counts_pop_<span class="sc">$</span>the_population <span class="ot">&lt;-</span> <span class="fu">log</span>(counts_pop_<span class="sc">$</span>the_population) <span class="do">## took log so we can see it </span></span>
-<span id="cb37-23"><a href="#cb37-23" aria-hidden="true" tabindex="-1"></a>counts_pop_</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>counts_pop_ <span class="ot">&lt;-</span> population_state <span class="sc">%&gt;%</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(State) <span class="sc">%&gt;%</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">Count =</span> <span class="fu">n</span>(),<span class="at">Average_Magnitude =</span> <span class="fu">mean</span>(MAGNITUDE, <span class="at">na.rm =</span> <span class="cn">FALSE</span>),<span class="at">the_population =</span> <span class="fu">mean</span>(population, <span class="at">na.rm =</span> <span class="cn">FALSE</span>))</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>counts_pop_ <span class="ot">&lt;-</span> counts_pop_[<span class="sc">-</span><span class="dv">1</span>, ]</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="do">## remove rows with numbers</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># counts_pop_</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 0 × 4
-# ℹ 4 variables: State &lt;chr&gt;, Count &lt;dbl&gt;, Average_Magnitude &lt;dbl&gt;,
-#   the_population &lt;dbl&gt;</code></pre>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid" width="960"></p>
 </div>
 </div>
+<p>There is a slight positive correlation between states with a higher population and the frequency of which they have earthquakes. This is true for both high and low magnitude earthquakes. This result, furthermore, motivates the need for safety measures against earthquakes across populous areas. If they do not, then there can be severe consequences for areas that are dense, in the form of lives lost.</p>
+</section>
+<section id="exploration-of-global-earthquakes" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="exploration-of-global-earthquakes"><span class="header-section-number">3.2</span> Exploration of Global Earthquakes</h2>
+<p>We plot a map of the global earthquakes over magnitude 4. We also plot a map of the fault lines to inspect if there is a relationship between the location of the earthquake and its magnitude.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid" width="960"></p>
+</div>
+</div>
+<p>As we can see by inspection, most earthquakes occur near the fault lines. This makes sense as earthquakes are caused by movements of tectonic plates with the fault lines being the source of the interactions of the earthquakes. This plot is also colored by magnitude, and further shows how much low magnitude earthquakes occur away from the fault lines compared to near them. It’s pretty clear that most occur on the coasts (where fault lines are most common) and thereby most occur on islands (near Singapore and the Philippines). However, land based earthquakes occur mostly across mountain ranges in the Andes, Himalayas, the East African Rift, the Alps and the Rockies on the Pacific coast.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>We plot a boxplot to examine earthquake magnitudes over time as well in land vs ocean. SImilar to the US state data, we see an inflection point in the number of earthquakes as shown by the widths of the boxplot, with the fewer land based earthquakes before 1970 being higher magnitude suggesting these are not recorded. We also see a downtrend in median earthquake magnitude suggesting measuring equipment capturing smaller earthquakes, as the distribution is largely similar across land and ocean.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="results_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The Mosiac plot highlights two things. The first is that there are very few Earthquakes with a horizontal Error of more than 0. HorizontalError measures the uncertainties in an event’s location, with an “unknown” value if the contributing seismic network does not supply uncertainty estimates (i.e.&nbsp;which we encode with a value of 0). With this said, for those with a horizontal error of more, they are predominantly located on the Ocean and highlighting an interesting dependence that earthquakes seismograph networks track ocean based earthquakes more than land based ones.</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># counts_pop_ &lt;- na.omit(counts_pop_)</span></span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a><span class="co"># # Create bins for Average_Magnitude</span></span>
-<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a><span class="co"># counts_pop_$bins &lt;- cut(counts_pop_$Average_Magnitude, breaks = c(0, 4, 11), labels = c("0-4", "5-11"))</span></span>
-<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a><span class="co"># # Scatter plot with facets</span></span>
-<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a><span class="co"># ggplot(counts_pop_, aes(x = the_population, y = Count)) +</span></span>
-<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_smooth(method = "lm", se = FALSE, col = "blue") +  # Add a line of best fit</span></span>
-<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point() +</span></span>
-<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a><span class="co">#   facet_wrap(~ bins, scales = "free") +</span></span>
-<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a><span class="co">#   labs(title = "Scatter Plot of Current Population vs Frequency of Earthquakes with Binned Average Magnitude for 1638-1985", </span></span>
-<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a><span class="co">#        x = "Population (LOG)", y = "Frequency of Earthquake (LOG)")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># earthquakes_with_fault_distance %&gt;% </span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   ggplot() +</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(aes(x=distance_to_fault/1000, y=mag), alpha=0.3) +</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   ggtitle("Distance To Fault vs Magnitude") + xlab("Distance to Nearest Fault (km)") +</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   xlim(0,1000) +</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme_classic()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>There is a Slight positive correlation between states with a higher population and the frequency of which they have earthquakes. This is true for both high and low magnitutde earthquakes. This result, furthermore, motivates the need for safety measures against earthquakes across populus areas. If they do not, then there can be severe consequences for areas that are dense, in the form of lives lost.</p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -882,7 +568,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     </div>   
     <div class="nav-footer-center">
       &nbsp;
-    <div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/aa221/EDAV-EARTHQUAKES-PROJECT/edit/main/results.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/aa221/EDAV-EARTHQUAKES-PROJECT/issues/new" class="toc-action">Report an issue</a></p></div></div></div>
+    </div>
     <div class="nav-footer-right">This book was built with <a href="https://quarto.org/">Quarto</a>.</div>
   </div>
 </footer>

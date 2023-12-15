@@ -500,7 +500,24 @@ legend(120, -65,
 
 As we can see by inspection, most earthquakes occur near the fault lines. This makes sense as earthquakes are caused by movements of tectonic plates with the fault lines being the source of the interactions of the earthquakes. This plot is also colored by magnitude, and further shows how much low magnitude earthquakes occur away from the fault lines compared to near them. It's pretty clear that most occur on the coasts (where fault lines are most common) and thereby most occur on islands (near Singapore and the Philippines). However, land based earthquakes occur mostly across mountain ranges in the Andes, Himalayas, the East African Rift, the Alps and the Rockies on the Pacific coast.
 
+```{r}
+#| warning: false
+#| message: false
+#| echo: false
 
+mosaic_data_2 <- mutate(usgs_eq_list, Ocean = ii) %>% 
+  mutate(Location = ifelse(Ocean==TRUE, 'Ocean', 'Land')) %>% 
+  mutate(Magnitude_Type = ifelse(mag<6, 'Low Magnitude (4-6)', 'High Magnitude (6+)'))
+
+mosaic_data_2 %>% ungroup() %>% mutate(year = as.numeric(format(date,"%Y") )) %>% mutate(Decade = year - year %% 10) %>% mutate(year=as.factor(year), Decade = as.factor(Decade)) %>% ggplot() + geom_boxplot(aes(y=mag, x=Decade), varwidth = TRUE, outlier.size = 0.1, fill="red", alpha=0.5) + facet_wrap(~Location) + ylab("Magnitude") + 
+    theme_linedraw() + 
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+# mosaicplot(table(mosaic_data$Ocean, mosaic_data$horizontal_encode),
+#            main = "Mosaic Plot: Ocean vs. Horizontal Error Category", color = c("blue", "green"))
+```
+
+We plot a boxplot to examine earthquake magnitudes over time as well in land vs ocean. SImilar to the US state data, we see an inflection point in the number of earthquakes as shown by the widths of the boxplot, with the fewer land based earthquakes before 1970 being higher magnitude suggesting these are not recorded. We also see a downtrend in median earthquake magnitude suggesting measuring equipment capturing smaller earthquakes, as the distribution is largely similar across land and ocean.
 
 ```{r}
 #| warning: false
@@ -523,6 +540,7 @@ mosaic_data %>%
 #            main = "Mosaic Plot: Ocean vs. Horizontal Error Category", color = c("blue", "green"))
 ```
 The Mosiac plot highlights two things. The first is that there are very few Earthquakes with a horizontal Error of more than 0. HorizontalError measures the uncertainties in an event's location, with an "unknown" value if the contributing seismic network does not supply uncertainty estimates (i.e. which we encode with a value of 0). With this said, for those with a horizontal error of more, they are predominantly located on the Ocean and highlighting an interesting dependence that earthquakes seismograph networks track ocean based earthquakes more than land based ones. 
+
 
 
 
